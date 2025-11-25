@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+import json
 from erpnext_amex.utils.classification_memory import get_classification_suggestion, learn_from_transaction
 from erpnext_amex.utils.journal_entry_creator import create_journal_entry_from_transaction, create_bulk_journal_entries
 
@@ -12,6 +13,8 @@ def get_pending_transactions(filters=None):
 	"""Get list of pending transactions for review"""
 	if filters is None:
 		filters = {}
+	elif isinstance(filters, str):
+		filters = json.loads(filters)
 	
 	# Build filter conditions
 	conditions = ["status IN ('Pending', 'Classified')"]
