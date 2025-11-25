@@ -98,7 +98,7 @@ class AMEXReviewPage {
 
 	load_filter_options() {
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_filter_options',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_filter_options',
 			callback: (r) => {
 				if (r.message) {
 					// Populate batch filter
@@ -118,7 +118,7 @@ class AMEXReviewPage {
 	load_dropdowns() {
 		// Load suppliers
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_supplier_list',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_supplier_list',
 			callback: (r) => {
 				if (r.message) {
 					r.message.forEach(supplier => {
@@ -130,7 +130,7 @@ class AMEXReviewPage {
 
 		// Load accounts
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_account_list',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_account_list',
 			args: { account_type: 'Expense' },
 			callback: (r) => {
 				if (r.message) {
@@ -143,7 +143,7 @@ class AMEXReviewPage {
 
 		// Load cost centers
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_cost_center_list',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_cost_center_list',
 			callback: (r) => {
 				if (r.message) {
 					r.message.forEach(cc => {
@@ -170,7 +170,7 @@ class AMEXReviewPage {
 		$('#no-transactions').hide();
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_pending_transactions',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_pending_transactions',
 			args: { filters: filters },
 			callback: (r) => {
 				$('#loading-transactions').hide();
@@ -226,7 +226,7 @@ class AMEXReviewPage {
 		const me = this;
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_transaction_details',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_transaction_details',
 			args: { transaction_name: transaction_name },
 			callback: (r) => {
 				if (r.message) {
@@ -343,7 +343,7 @@ class AMEXReviewPage {
 		// Populate cost centers for new row
 		const last_select = $('#split-table-body tr:last .split-cost-center-select');
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.get_cost_center_list',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_cost_center_list',
 			callback: (r) => {
 				if (r.message) {
 					r.message.forEach(cc => {
@@ -434,7 +434,7 @@ class AMEXReviewPage {
 
 		// Save classification
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.classify_transaction',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.classify_transaction',
 			args: data,
 			callback: (r) => {
 				if (r.message && r.message.status === 'success') {
@@ -450,7 +450,7 @@ class AMEXReviewPage {
 		const me = this;
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.approve_transaction',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.approve_transaction',
 			args: { transaction_name: me.selected_transaction.name },
 			callback: (r) => {
 				if (r.message && r.message.status === 'success') {
@@ -466,7 +466,7 @@ class AMEXReviewPage {
 		const me = this;
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.post_transaction',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.post_transaction',
 			args: { transaction_name: me.selected_transaction.name },
 			callback: (r) => {
 				if (r.message && r.message.status === 'success') {
@@ -482,7 +482,7 @@ class AMEXReviewPage {
 		const me = this;
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.mark_as_duplicate',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.mark_as_duplicate',
 			args: { transaction_name: me.selected_transaction.name },
 			callback: (r) => {
 				if (r.message && r.message.status === 'success') {
@@ -507,7 +507,7 @@ class AMEXReviewPage {
 			`Approve and post ${selected.length} transaction(s)?`,
 			() => {
 				frappe.call({
-					method: 'erpnext_amex.page.amex_review.amex_review.bulk_approve_and_post',
+					method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.bulk_approve_and_post',
 					args: { transaction_names: selected },
 					callback: (r) => {
 						if (r.message) {
@@ -533,7 +533,7 @@ class AMEXReviewPage {
 		}
 
 		frappe.call({
-			method: 'erpnext_amex.page.amex_review.amex_review.create_vendor_quick',
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.create_vendor_quick',
 			args: {
 				vendor_name: vendor_name,
 				supplier_group: $('#new-vendor-group').val(),
