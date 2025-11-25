@@ -1,0 +1,30 @@
+{
+  "department_to_cost_center": {
+    "Marketing": "Marketing - Your Company",
+    "Marketing - Content": "Marketing - Content Creation - Your Company",
+    "Marketing - Paid Ads": "Marketing - Paid Ads - Your Company",
+    "Marketing - TikTok": "Marketing - Paid Ads - TikTok - Your Company",
+    "Marketing - Meta": "Marketing - Paid Ads - Meta - Your Company",
+    "Marketing - Google": "Marketing - Paid Ads - Google - Your Company",
+    "Operations": "Operations - Your Company",
+    "Operations - Logistics": "Operations - Logistics - Your Company",
+    "Operations - Warehouse": "Operations - Warehouse - Your Company"
+  },
+  "class_to_dimension": {
+    "Brand A": "brand_a",
+    "Brand B": "brand_b",
+    "Campaign - Spring 2025": "spring_2025",
+    "Platform - TikTok": "tiktok",
+    "Platform - Instagram": "instagram"
+  },
+  "account_mapping": {
+    "6100 - Advertising": "Advertising - Online - Your Company",
+    "6200 - Travel & Entertainment": "Travel Expenses - Your Company",
+    "6300 - Office Expenses": "Office Expenses - Your Company",
+    "6400 - Professional Fees": "Professional Fees - Your Company",
+    "6500 - Shipping": "Freight and Forwarding Charges - Your Company",
+    "6600 - Utilities": "Utilities - Your Company",
+    "6700 - Supplies": "Office Supplies - Your Company"
+  }
+}
+
