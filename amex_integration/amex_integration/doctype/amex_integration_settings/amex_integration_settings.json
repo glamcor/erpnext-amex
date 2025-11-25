@@ -1,0 +1,224 @@
+{
+ "actions": [],
+ "creation": "2025-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_settings_section",
+  "amex_liability_account",
+  "default_expense_account",
+  "column_break_3",
+  "require_vendor_for_posting",
+  "processing_settings_section",
+  "auto_exclude_payments",
+  "enable_duplicate_detection",
+  "column_break_7",
+  "enable_classification_memory",
+  "ml_settings_section",
+  "enable_ml_classification",
+  "sagemaker_endpoint_name",
+  "column_break_11",
+  "aws_access_key_id",
+  "aws_secret_access_key",
+  "aws_region",
+  "ml_auto_accept_threshold",
+  "slack_settings_section",
+  "enable_slack_notifications",
+  "slack_bot_token",
+  "column_break_16",
+  "slack_signing_secret",
+  "google_api_settings_section",
+  "enable_vendor_enrichment",
+  "google_search_api_key",
+  "column_break_19",
+  "google_search_engine_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Account Settings"
+  },
+  {
+   "description": "Default credit account for AMEX transactions",
+   "fieldname": "amex_liability_account",
+   "fieldtype": "Link",
+   "label": "AMEX Liability Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_expense_account",
+   "fieldtype": "Link",
+   "label": "Default Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "require_vendor_for_posting",
+   "fieldtype": "Check",
+   "label": "Require Vendor for Posting"
+  },
+  {
+   "fieldname": "processing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Processing Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_exclude_payments",
+   "fieldtype": "Check",
+   "label": "Auto Exclude Payments"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_duplicate_detection",
+   "fieldtype": "Check",
+   "label": "Enable Duplicate Detection"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_classification_memory",
+   "fieldtype": "Check",
+   "label": "Enable Classification Memory"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ml_settings_section",
+   "fieldtype": "Section Break",
+   "label": "ML Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_ml_classification",
+   "fieldtype": "Check",
+   "label": "Enable ML Classification"
+  },
+  {
+   "depends_on": "enable_ml_classification",
+   "fieldname": "sagemaker_endpoint_name",
+   "fieldtype": "Data",
+   "label": "SageMaker Endpoint Name"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enable_ml_classification",
+   "fieldname": "aws_access_key_id",
+   "fieldtype": "Password",
+   "label": "AWS Access Key ID"
+  },
+  {
+   "depends_on": "enable_ml_classification",
+   "fieldname": "aws_secret_access_key",
+   "fieldtype": "Password",
+   "label": "AWS Secret Access Key"
+  },
+  {
+   "default": "us-east-1",
+   "depends_on": "enable_ml_classification",
+   "fieldname": "aws_region",
+   "fieldtype": "Data",
+   "label": "AWS Region"
+  },
+  {
+   "default": "0.90",
+   "depends_on": "enable_ml_classification",
+   "description": "Confidence threshold for auto-accepting ML predictions (0.0 to 1.0)",
+   "fieldname": "ml_auto_accept_threshold",
+   "fieldtype": "Float",
+   "label": "ML Auto Accept Threshold",
+   "precision": "2"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "slack_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Slack Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_slack_notifications",
+   "fieldtype": "Check",
+   "label": "Enable Slack Notifications"
+  },
+  {
+   "depends_on": "enable_slack_notifications",
+   "fieldname": "slack_bot_token",
+   "fieldtype": "Password",
+   "label": "Slack Bot Token"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enable_slack_notifications",
+   "fieldname": "slack_signing_secret",
+   "fieldtype": "Password",
+   "label": "Slack Signing Secret"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "google_api_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Google API Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_vendor_enrichment",
+   "fieldtype": "Check",
+   "label": "Enable Vendor Enrichment"
+  },
+  {
+   "depends_on": "enable_vendor_enrichment",
+   "fieldname": "google_search_api_key",
+   "fieldtype": "Password",
+   "label": "Google Search API Key"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enable_vendor_enrichment",
+   "fieldname": "google_search_engine_id",
+   "fieldtype": "Data",
+   "label": "Google Search Engine ID"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "AMEX Integration",
+ "name": "AMEX Integration Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
+

@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:AMEX-BATCH-{YYYY}-{#####}",
+ "creation": "2025-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "import_date",
+  "uploaded_by",
+  "column_break_2",
+  "status",
+  "batch_reference",
+  "section_break_4",
+  "csv_file",
+  "section_break_6",
+  "total_transactions",
+  "processed_count",
+  "column_break_8",
+  "pending_count",
+  "duplicate_count",
+  "excluded_count"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "import_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Import Date",
+   "reqd": 1
+  },
+  {
+   "default": "user",
+   "fieldname": "uploaded_by",
+   "fieldtype": "Link",
+   "label": "Uploaded By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nIn Review\nCompleted\nError",
+   "reqd": 1
+  },
+  {
+   "fieldname": "batch_reference",
+   "fieldtype": "Data",
+   "label": "Batch Reference",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "CSV File"
+  },
+  {
+   "fieldname": "csv_file",
+   "fieldtype": "Attach",
+   "label": "CSV File",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Transaction Summary"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_transactions",
+   "fieldtype": "Int",
+   "label": "Total Transactions",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "processed_count",
+   "fieldtype": "Int",
+   "label": "Processed Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "pending_count",
+   "fieldtype": "Int",
+   "label": "Pending Classification",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "duplicate_count",
+   "fieldtype": "Int",
+   "label": "Duplicates Detected",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "excluded_count",
+   "fieldtype": "Int",
+   "label": "Excluded (Payments)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "AMEX Integration",
+ "name": "AMEX Import Batch",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "AMEX Transaction Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+
