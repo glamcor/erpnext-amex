@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="amex_integration",
+    name="erpnext_amex",
     version="0.0.1",
     author="Your Company",
     author_email="support@yourcompany.com",

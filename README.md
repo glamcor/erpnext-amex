@@ -30,12 +30,12 @@ Custom ERPNext app for importing and classifying American Express CSV transactio
 
 1. Get the app:
 ```bash
-bench get-app https://github.com/your-org/amex_integration
+bench get-app https://github.com/your-org/erpnext_amex
 ```
 
 2. Install on site:
 ```bash
-bench --site your-site install-app amex_integration
+bench --site your-site install-app erpnext_amex
 ```
 
 3. Configure settings:

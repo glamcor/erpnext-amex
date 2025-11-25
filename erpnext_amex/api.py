@@ -19,7 +19,7 @@ def upload_csv(file_content=None, file_name=None):
 		dict: Result of import
 	"""
 	try:
-		from amex_integration.amex_integration.utils.csv_parser import create_import_batch
+		from erpnext_amex.utils.csv_parser import create_import_batch
 		
 		# Create batch record
 		batch = create_import_batch(file_content, frappe.session.user)
@@ -137,7 +137,7 @@ def validate_transaction(transaction_name):
 	Returns:
 		dict: Validation result
 	"""
-	from amex_integration.amex_integration.utils.journal_entry_creator import validate_journal_entry_data
+	from erpnext_amex.utils.journal_entry_creator import validate_journal_entry_data
 	
 	transaction = frappe.get_doc('AMEX Transaction', transaction_name)
 	is_valid, error_msg = validate_journal_entry_data(transaction)
@@ -216,7 +216,7 @@ def get_vendor_suggestions(description):
 	Returns:
 		dict: Suggested classification
 	"""
-	from amex_integration.amex_integration.utils.classification_memory import get_classification_suggestion
+	from erpnext_amex.utils.classification_memory import get_classification_suggestion
 	
 	suggestion = get_classification_suggestion(description)
 	

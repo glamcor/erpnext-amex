@@ -132,16 +132,16 @@
 
 ```python
 # Get pending transactions
-GET /api/method/amex_integration.amex_integration.api.get_pending_transactions
+GET /api/method/erpnext_amex.api.get_pending_transactions
 
 # Classify transaction
-POST /api/method/amex_integration.amex_integration.api.classify_transaction
+POST /api/method/erpnext_amex.api.classify_transaction
 
 # Post to journal entry
-POST /api/method/amex_integration.amex_integration.api.post_to_journal_entry
+POST /api/method/erpnext_amex.api.post_to_journal_entry
 
 # Get batch status
-GET /api/method/amex_integration.amex_integration.api.get_batch_status
+GET /api/method/erpnext_amex.api.get_batch_status
 ```
 
 ## ⚙️ Settings Checklist

@@ -17,13 +17,13 @@ cd ~/frappe-bench
 bench get-app https://github.com/glamcor/erpnext-amex.git
 ```
 
-This will clone the app into `apps/amex_integration/`
+This will clone the app into `apps/erpnext_amex/`
 
 ### Step 2: Install on Your Site
 
 ```bash
 # Install the app on your site
-bench --site your-site-name install-app amex_integration
+bench --site your-site-name install-app erpnext_amex
 
 # This will:
 # - Create all 6 DocTypes
@@ -97,7 +97,7 @@ When you make changes and push to GitHub:
 
 ```bash
 # On your server
-cd ~/frappe-bench/apps/amex_integration
+cd ~/frappe-bench/apps/erpnext_amex
 
 # Pull latest changes
 git pull origin main
@@ -142,10 +142,10 @@ After installation, verify:
 # Ensure app is installed
 bench --site your-site-name list-apps
 
-# Should show: amex_integration
+# Should show: erpnext_amex
 
 # If not listed, reinstall:
-bench --site your-site-name install-app amex_integration
+bench --site your-site-name install-app erpnext_amex
 ```
 
 ### DocTypes Not Showing
@@ -169,7 +169,7 @@ bench --site your-site-name console
 
 ```bash
 # Build assets
-bench build --app amex_integration
+bench build --app erpnext_amex
 
 # Clear cache
 bench --site your-site-name clear-cache

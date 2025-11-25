@@ -19,10 +19,10 @@ bench get-app https://github.com/glamcor/erpnext-amex.git
 
 ### 2. Install on Site
 ```bash
-bench --site your-site-name install-app amex_integration
+bench --site your-site-name install-app erpnext_amex
 ```
 - [ ] Installation completed without errors
-- [ ] "Installing amex_integration" message appeared
+- [ ] "Installing erpnext_amex" message appeared
 - [ ] No DocType errors
 
 ### 3. Migrate Database
@@ -243,9 +243,9 @@ Once all checkboxes are checked, your AMEX Integration is fully operational!
 ### Error: "App already exists"
 ```bash
 # Remove and reinstall
-bench remove-app amex_integration
+bench remove-app erpnext_amex
 bench get-app https://github.com/glamcor/erpnext-amex.git
-bench --site your-site-name install-app amex_integration
+bench --site your-site-name install-app erpnext_amex
 ```
 
 ### Error: "DocType already exists"
@@ -258,14 +258,14 @@ bench --site your-site-name migrate --skip-failing
 ### Error: "Permission denied"
 ```bash
 # Check file permissions
-cd ~/frappe-bench/apps/amex_integration
+cd ~/frappe-bench/apps/erpnext_amex
 sudo chown -R frappe:frappe .
 ```
 
 ### CSS/JS Not Loading
 ```bash
 # Build assets
-bench build --app amex_integration
+bench build --app erpnext_amex
 
 # Or build everything
 bench build

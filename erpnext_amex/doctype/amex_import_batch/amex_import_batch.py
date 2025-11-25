@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from amex_integration.amex_integration.utils.csv_parser import parse_amex_csv, create_import_batch
+from erpnext_amex.utils.csv_parser import parse_amex_csv, create_import_batch
 
 
 class AMEXImportBatch(Document):

@@ -100,10 +100,10 @@ This custom ERPNext app provides intelligent AMEX expense classification and imp
 ```bash
 # On your Frappe bench
 cd frappe-bench
-bench get-app https://github.com/your-org/amex_integration
+bench get-app https://github.com/your-org/erpnext_amex
 
 # Install on your site
-bench --site your-site install-app amex_integration
+bench --site your-site install-app erpnext_amex
 
 # Migrate database
 bench --site your-site migrate
@@ -247,10 +247,10 @@ The app exposes RESTful APIs for integration:
 
 ```python
 # Get pending transactions
-GET /api/method/amex_integration.amex_integration.api.get_pending_transactions
+GET /api/method/erpnext_amex.erpnext_amex.api.get_pending_transactions
 
 # Classify transaction
-POST /api/method/amex_integration.amex_integration.api.classify_transaction
+POST /api/method/erpnext_amex.erpnext_amex.api.classify_transaction
 {
     "transaction_name": "AMEX-TXN-001",
     "expense_account": "Advertising - Your Company",
@@ -258,13 +258,13 @@ POST /api/method/amex_integration.amex_integration.api.classify_transaction
 }
 
 # Post to journal entry
-POST /api/method/amex_integration.amex_integration.api.post_to_journal_entry
+POST /api/method/erpnext_amex.erpnext_amex.api.post_to_journal_entry
 {
     "transaction_name": "AMEX-TXN-001"
 }
 
 # Get batch status
-GET /api/method/amex_integration.amex_integration.api.get_batch_status?batch_id=AMEX-BATCH-001
+GET /api/method/erpnext_amex.erpnext_amex.api.get_batch_status?batch_id=AMEX-BATCH-001
 ```
 
 ## Troubleshooting
@@ -375,8 +375,8 @@ Track these KPIs:
 ## Files & Structure
 
 ```
-amex_integration/
-├── amex_integration/
+erpnext_amex/
+├── erpnext_amex/
 │   ├── doctype/                   # All DocTypes
 │   ├── page/amex_review/          # Main review UI
 │   ├── report/                    # Custom reports

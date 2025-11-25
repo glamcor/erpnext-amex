@@ -95,7 +95,7 @@ class AMEXTransaction(Document):
 	
 	def post_to_journal_entry(self):
 		"""Post transaction to journal entry"""
-		from amex_integration.amex_integration.utils.journal_entry_creator import create_journal_entry_from_transaction
+		from erpnext_amex.utils.journal_entry_creator import create_journal_entry_from_transaction
 		
 		if self.status != "Approved":
 			frappe.throw("Transaction must be approved before posting")

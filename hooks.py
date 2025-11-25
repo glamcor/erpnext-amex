@@ -1,6 +1,6 @@
 from . import __version__ as app_version
 
-app_name = "amex_integration"
+app_name = "erpnext_amex"
 app_title = "AMEX Integration"
 app_publisher = "Your Company"
 app_description = "AMEX expense classification and import system for ERPNext"
@@ -11,15 +11,15 @@ app_license = "MIT"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/amex_integration/css/amex_integration.css"
-app_include_js = "/assets/amex_integration/js/amex_integration.js"
+# app_include_css = "/assets/erpnext_amex/css/erpnext_amex.css"
+app_include_js = "/assets/erpnext_amex/js/erpnext_amex.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/amex_integration/css/amex_integration.css"
-# web_include_js = "/assets/amex_integration/js/amex_integration.js"
+# web_include_css = "/assets/erpnext_amex/css/erpnext_amex.css"
+# web_include_js = "/assets/erpnext_amex/js/erpnext_amex.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "amex_integration/public/scss/website"
+# website_theme_scss = "erpnext_amex/public/scss/website"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -56,27 +56,27 @@ app_include_js = "/assets/amex_integration/js/amex_integration.js"
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "amex_integration.utils.jinja_methods",
-#	"filters": "amex_integration.utils.jinja_filters"
+#	"methods": "erpnext_amex.utils.jinja_methods",
+#	"filters": "erpnext_amex.utils.jinja_filters"
 # }
 
 # Installation
 # ------------
 
-# before_install = "amex_integration.install.before_install"
-# after_install = "amex_integration.install.after_install"
+# before_install = "erpnext_amex.install.before_install"
+# after_install = "erpnext_amex.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "amex_integration.uninstall.before_uninstall"
-# after_uninstall = "amex_integration.uninstall.after_uninstall"
+# before_uninstall = "erpnext_amex.uninstall.before_uninstall"
+# after_uninstall = "erpnext_amex.uninstall.after_uninstall"
 
 # Desk Notifications
 # -------------------
 # See frappe.core.notifications.get_notification_config
 
-# notification_config = "amex_integration.notifications.get_notification_config"
+# notification_config = "erpnext_amex.notifications.get_notification_config"
 
 # Permissions
 # -----------
@@ -115,39 +115,39 @@ app_include_js = "/assets/amex_integration/js/amex_integration.js"
 
 # scheduler_events = {
 #	"all": [
-#		"amex_integration.tasks.all"
+#		"erpnext_amex.tasks.all"
 #	],
 #	"daily": [
-#		"amex_integration.tasks.daily"
+#		"erpnext_amex.tasks.daily"
 #	],
 #	"hourly": [
-#		"amex_integration.tasks.hourly"
+#		"erpnext_amex.tasks.hourly"
 #	],
 #	"weekly": [
-#		"amex_integration.tasks.weekly"
+#		"erpnext_amex.tasks.weekly"
 #	],
 #	"monthly": [
-#		"amex_integration.tasks.monthly"
+#		"erpnext_amex.tasks.monthly"
 #	],
 # }
 
 # Testing
 # -------
 
-# before_tests = "amex_integration.install.before_tests"
+# before_tests = "erpnext_amex.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "amex_integration.event.get_events"
+#	"frappe.desk.doctype.event.event.get_events": "erpnext_amex.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "amex_integration.task.get_dashboard_data"
+#	"Task": "erpnext_amex.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -161,13 +161,13 @@ app_include_js = "/assets/amex_integration/js/amex_integration.js"
 
 # Request Events
 # ----------------
-# before_request = ["amex_integration.utils.before_request"]
-# after_request = ["amex_integration.utils.after_request"]
+# before_request = ["erpnext_amex.utils.before_request"]
+# after_request = ["erpnext_amex.utils.after_request"]
 
 # Job Events
 # ----------
-# before_job = ["amex_integration.utils.before_job"]
-# after_job = ["amex_integration.utils.after_job"]
+# before_job = ["erpnext_amex.utils.before_job"]
+# after_job = ["erpnext_amex.utils.after_job"]
 
 # User Data Protection
 # --------------------
@@ -197,6 +197,6 @@ app_include_js = "/assets/amex_integration/js/amex_integration.js"
 # --------------------------------
 
 # auth_hooks = [
-#	"amex_integration.auth.validate"
+#	"erpnext_amex.auth.validate"
 # ]
 

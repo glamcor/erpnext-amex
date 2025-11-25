@@ -16,7 +16,7 @@ erpnext-amex/                          ← Repository root
 ├── pyproject.toml                     ✅ Modern Python config
 ├── README.md                          ✅ Documentation
 │
-├── amex_integration/                  ✅ Main module directory
+├── erpnext_amex/                  ✅ Main module directory
 │   ├── __init__.py
 │   ├── api.py                         (REST API endpoints)
 │   ├── doctype/                       (6 DocTypes)
@@ -24,7 +24,7 @@ erpnext-amex/                          ← Repository root
 │   │   ├── amex_transaction/
 │   │   ├── amex_transaction_split/
 │   │   ├── amex_vendor_classification_rule/
-│   │   ├── amex_integration_settings/
+│   │   ├── erpnext_amex_settings/
 │   │   └── fraud_report/
 │   ├── page/                          (Custom pages)
 │   │   └── amex_review/
@@ -45,9 +45,9 @@ erpnext-amex/                          ← Repository root
 │
 ├── public/                            ✅ Frontend assets
 │   ├── css/
-│   │   └── amex_integration.css
+│   │   └── erpnext_amex.css
 │   └── js/
-│       └── amex_integration.js
+│       └── erpnext_amex.js
 │
 ├── sagemaker/                         (ML training scripts)
 │   ├── train.py
@@ -67,7 +67,7 @@ erpnext-amex/                          ← Repository root
 - [x] `patches.txt` exists
 - [x] `modules.txt` exists
 - [x] `setup.py` exists
-- [x] Module directory `amex_integration/` exists
+- [x] Module directory `erpnext_amex/` exists
 - [x] `config/` directory exists
 - [x] `public/` directory exists
 - [x] All DocTypes have proper structure
@@ -81,7 +81,7 @@ The app structure is now **100% Frappe-compliant** and should install without er
 ```bash
 # On your Frappe bench
 bench get-app https://github.com/glamcor/erpnext-amex.git
-bench --site your-site-name install-app amex_integration
+bench --site your-site-name install-app erpnext_amex
 bench --site your-site-name migrate
 bench --site your-site-name clear-cache
 bench restart
@@ -91,22 +91,22 @@ bench restart
 
 When running `bench get-app`:
 ```
-Getting amex_integration
+Getting erpnext_amex
 $ git clone https://github.com/glamcor/erpnext-amex.git
-Cloning into 'amex_integration'...
+Cloning into 'erpnext_amex'...
 ✓ App successfully installed
 ```
 
 When running `install-app`:
 ```
-Installing amex_integration...
+Installing erpnext_amex...
 Installing AMEX Integration Module...
-✓ amex_integration installed
+✓ erpnext_amex installed
 ```
 
 When running `migrate`:
 ```
-Migrating amex_integration
+Migrating erpnext_amex
 Creating DocType AMEX Import Batch
 Creating DocType AMEX Transaction
 Creating DocType AMEX Transaction Split
@@ -133,7 +133,7 @@ cd ~/frappe-bench
 
 ```bash
 cd ~/frappe-bench/apps
-ls -la amex_integration/
+ls -la erpnext_amex/
 # Should show: hooks.py, modules.txt, patches.txt, setup.py, etc.
 ```
 
@@ -141,8 +141,8 @@ ls -la amex_integration/
 
 From the bench directory:
 ```bash
-python -c "from amex_integration.hooks import app_name; print(app_name)"
-# Should output: amex_integration
+python -c "from erpnext_amex.hooks import app_name; print(app_name)"
+# Should output: erpnext_amex
 ```
 
 ## 📞 Support

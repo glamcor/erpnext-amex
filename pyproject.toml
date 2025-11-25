@@ -1,5 +1,5 @@
 [project]
-name = "amex_integration"
+name = "erpnext_amex"
 version = "0.0.1"
 description = "AMEX expense classification and import system for ERPNext"
 authors = [

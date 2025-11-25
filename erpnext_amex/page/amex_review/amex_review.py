@@ -3,8 +3,8 @@
 
 import frappe
 from frappe import _
-from amex_integration.amex_integration.utils.classification_memory import get_classification_suggestion, learn_from_transaction
-from amex_integration.amex_integration.utils.journal_entry_creator import create_journal_entry_from_transaction, create_bulk_journal_entries
+from erpnext_amex.utils.classification_memory import get_classification_suggestion, learn_from_transaction
+from erpnext_amex.utils.journal_entry_creator import create_journal_entry_from_transaction, create_bulk_journal_entries
 
 
 @frappe.whitelist()
