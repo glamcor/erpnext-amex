@@ -264,3 +264,4 @@ def batch_enrich_transactions(transaction_list):
 	
 	return results
 
+

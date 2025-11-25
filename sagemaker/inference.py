@@ -103,3 +103,4 @@ def output_fn(predictions, content_type='application/json'):
 	else:
 		raise ValueError(f"Unsupported content type: {content_type}")
 
+

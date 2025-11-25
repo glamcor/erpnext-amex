@@ -308,3 +308,4 @@ def send_batch_complete_notification(batch_id):
 	
 	return True
 
+

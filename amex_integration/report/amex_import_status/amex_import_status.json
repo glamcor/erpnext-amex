@@ -1,5 +1,5 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "columns": [],
  "creation": "2025-01-01 00:00:00.000000",
  "disable_prepared_report": 0,
@@ -13,11 +13,11 @@
  "modified": "2025-01-01 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "AMEX Integration",
- "name": "Unclassified Transactions",
+ "name": "AMEX Import Status",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "AMEX Transaction",
- "report_name": "Unclassified Transactions",
+ "ref_doctype": "AMEX Import Batch",
+ "report_name": "AMEX Import Status",
  "report_type": "Script Report",
  "roles": [
   {
@@ -31,4 +31,5 @@
   }
  ]
 }
+
 
