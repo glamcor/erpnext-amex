@@ -1,0 +1,38 @@
+/* AMEX Integration styles */
+.amex-transaction-list {
+    margin: 20px 0;
+}
+
+.amex-classification-panel {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.amex-split-table {
+    margin: 15px 0;
+}
+
+.amex-confidence-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.amex-confidence-high {
+    background: #d4edda;
+    color: #155724;
+}
+
+.amex-confidence-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.amex-confidence-low {
+    background: #f8d7da;
+    color: #721c24;
+}
+
