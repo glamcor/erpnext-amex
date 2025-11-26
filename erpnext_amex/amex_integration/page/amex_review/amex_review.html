@@ -17,17 +17,22 @@
 		<!-- Filters -->
 		<div class="filter-section card" style="margin-bottom: 20px; padding: 15px;">
 			<div class="row">
-				<div class="col-sm-3">
+				<div class="col-sm-2">
 					<label>Batch</label>
 					<select class="form-control form-control-sm" id="filter-batch">
 						<option value="">All Batches</option>
 					</select>
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-2">
 					<label>Card Member</label>
 					<select class="form-control form-control-sm" id="filter-card-member">
 						<option value="">All Card Members</option>
 					</select>
+				</div>
+				<div class="col-sm-3">
+					<label>Search Description</label>
+					<input type="text" class="form-control form-control-sm" id="filter-keyword" 
+					       placeholder="e.g. ShipStation, Google, etc.">
 				</div>
 				<div class="col-sm-2">
 					<label>From Date</label>
@@ -37,9 +42,9 @@
 					<label>To Date</label>
 					<input type="date" class="form-control form-control-sm" id="filter-to-date">
 				</div>
-				<div class="col-sm-2">
+				<div class="col-sm-1">
 					<label>&nbsp;</label>
-					<button class="btn btn-primary btn-sm btn-block" id="apply-filters-btn">Apply Filters</button>
+					<button class="btn btn-primary btn-sm btn-block" id="apply-filters-btn">Apply</button>
 				</div>
 			</div>
 		</div>
@@ -47,7 +52,7 @@
 		<!-- Transaction List -->
 		<div class="transaction-list-section">
 			<div class="row">
-				<div class="col-md-7">
+				<div class="col-md-9">
 					<div class="card">
 						<div class="card-header">
 							<h5>Transactions</h5>
@@ -83,8 +88,46 @@
 					</div>
 				</div>
 
-				<div class="col-md-5">
-					<!-- Classification Panel -->
+				<div class="col-md-3">
+					<!-- Bulk Classification Panel -->
+					<div class="card amex-bulk-panel" id="bulk-panel" style="display: none;">
+						<div class="card-header">
+							<h5>Bulk Classification</h5>
+						</div>
+						<div class="card-body">
+							<div class="alert alert-info" style="margin-bottom: 15px; padding: 10px;">
+								<strong><span id="selected-count">0</span> transactions selected</strong>
+							</div>
+							
+							<div class="form-group">
+								<label>Vendor/Supplier</label>
+								<div id="bulk-vendor-field"></div>
+							</div>
+
+							<div class="form-group">
+								<label>Expense Account *</label>
+								<div id="bulk-expense-account-field"></div>
+							</div>
+
+							<div class="form-group">
+								<label>Cost Center *</label>
+								<div id="bulk-cost-center-field"></div>
+							</div>
+
+							<div class="form-group">
+								<label>Notes</label>
+								<textarea class="form-control form-control-sm" id="bulk-classification-notes" rows="2"></textarea>
+							</div>
+
+							<div class="form-group">
+								<button class="btn btn-success btn-sm btn-block" id="bulk-classify-btn">
+									<i class="fa fa-check"></i> Classify All Selected
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Single Transaction Classification Panel -->
 					<div class="card amex-classification-panel" id="classification-panel" style="display: none;">
 						<div class="card-header">
 							<h5>Classify Transaction</h5>
@@ -101,23 +144,15 @@
 								
 								<div class="form-group">
 									<label>Vendor/Supplier</label>
-									<div class="input-group">
-										<select class="form-control form-control-sm" id="vendor-select">
-											<option value="">No Vendor</option>
-										</select>
-										<div class="input-group-append">
-											<button class="btn btn-sm btn-outline-secondary" id="create-vendor-btn" type="button">
-												<i class="fa fa-plus"></i> New
-											</button>
-										</div>
-									</div>
+									<div id="vendor-field"></div>
+									<button class="btn btn-sm btn-outline-secondary" id="create-vendor-btn" type="button" style="margin-top: 5px;">
+										<i class="fa fa-plus"></i> Create New Vendor
+									</button>
 								</div>
 
 								<div class="form-group">
 									<label>Expense Account *</label>
-									<select class="form-control form-control-sm" id="expense-account-select" required>
-										<option value="">Select Account...</option>
-									</select>
+									<div id="expense-account-field"></div>
 								</div>
 
 								<div class="form-group">
@@ -131,9 +166,7 @@
 								<!-- Single Cost Center -->
 								<div class="form-group" id="single-cost-center-div">
 									<label>Cost Center *</label>
-									<select class="form-control form-control-sm" id="cost-center-select">
-										<option value="">Select Cost Center...</option>
-									</select>
+									<div id="cost-center-field"></div>
 								</div>
 
 								<!-- Split Cost Centers -->

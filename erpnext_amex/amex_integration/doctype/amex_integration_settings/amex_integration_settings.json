@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "account_settings_section",
+  "default_company",
   "amex_liability_account",
   "default_expense_account",
   "column_break_3",
@@ -39,6 +40,14 @@
    "fieldname": "account_settings_section",
    "fieldtype": "Section Break",
    "label": "Account Settings"
+  },
+  {
+   "description": "Default company for all AMEX transactions",
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company",
+   "reqd": 1
   },
   {
    "description": "Default credit account for AMEX transactions",

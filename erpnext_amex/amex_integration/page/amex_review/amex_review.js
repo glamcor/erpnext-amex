@@ -15,14 +15,121 @@ class AMEXReviewPage {
 		this.transactions = [];
 		this.selected_transaction = null;
 		this.selected_transactions = new Set();
+		this.keyword_debounce_timer = null;
 		
 		// Load the HTML
 		$(frappe.render_template("amex_review", {})).appendTo(this.page.body);
 		
 		this.setup_events();
+		this.setup_autocomplete_fields();
 		this.load_filter_options();
-		this.load_dropdowns();
 		this.load_transactions();
+	}
+
+	setup_autocomplete_fields() {
+		const me = this;
+		
+		// Single transaction vendor field
+		this.vendor_field = frappe.ui.form.make_control({
+			parent: $('#vendor-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Supplier',
+				label: 'Vendor/Supplier',
+				placeholder: 'Type to search...'
+			},
+			render_input: true
+		});
+		
+		// Single transaction expense account field
+		this.expense_account_field = frappe.ui.form.make_control({
+			parent: $('#expense-account-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Account',
+				label: 'Expense Account',
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'account_type': 'Expense',
+							'disabled': 0
+						}
+					};
+				}
+			},
+			render_input: true
+		});
+		
+		// Single transaction cost center field
+		this.cost_center_field = frappe.ui.form.make_control({
+			parent: $('#cost-center-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Cost Center',
+				label: 'Cost Center',
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'disabled': 0
+						}
+					};
+				}
+			},
+			render_input: true
+		});
+		
+		// Bulk vendor field
+		this.bulk_vendor_field = frappe.ui.form.make_control({
+			parent: $('#bulk-vendor-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Supplier',
+				label: 'Vendor/Supplier',
+				placeholder: 'Type to search...'
+			},
+			render_input: true
+		});
+		
+		// Bulk expense account field
+		this.bulk_expense_account_field = frappe.ui.form.make_control({
+			parent: $('#bulk-expense-account-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Account',
+				label: 'Expense Account',
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'account_type': 'Expense',
+							'disabled': 0
+						}
+					};
+				}
+			},
+			render_input: true
+		});
+		
+		// Bulk cost center field
+		this.bulk_cost_center_field = frappe.ui.form.make_control({
+			parent: $('#bulk-cost-center-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Cost Center',
+				label: 'Cost Center',
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'disabled': 0
+						}
+					};
+				}
+			},
+			render_input: true
+		});
 	}
 
 	setup_events() {
@@ -33,6 +140,14 @@ class AMEXReviewPage {
 
 		// Apply filters
 		$('#apply-filters-btn').click(() => me.load_transactions());
+		
+		// Keyword filter with debounce
+		$('#filter-keyword').on('input', function() {
+			clearTimeout(me.keyword_debounce_timer);
+			me.keyword_debounce_timer = setTimeout(() => {
+				me.load_transactions();
+			}, 500);
+		});
 
 		// Select all checkbox
 		$('#select-all-transactions').change(function() {
@@ -88,6 +203,9 @@ class AMEXReviewPage {
 
 		// Bulk approve button
 		$('#bulk-approve-btn').click(() => me.bulk_approve_and_post());
+		
+		// Bulk classify button
+		$('#bulk-classify-btn').click(() => me.bulk_classify_transactions());
 
 		// Create vendor button
 		$('#create-vendor-btn').click(() => $('#vendor-modal').modal('show'));
@@ -115,63 +233,23 @@ class AMEXReviewPage {
 		});
 	}
 
-	load_dropdowns() {
-		// Load suppliers
-		frappe.call({
-			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_supplier_list',
-			callback: (r) => {
-				if (r.message) {
-					r.message.forEach(supplier => {
-						$('#vendor-select').append(`<option value="${supplier.name}">${supplier.supplier_name}</option>`);
-					});
-				}
-			}
-		});
-
-		// Load accounts
-		frappe.call({
-			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_account_list',
-			args: { account_type: 'Expense' },
-			callback: (r) => {
-				if (r.message) {
-					r.message.forEach(account => {
-						$('#expense-account-select').append(`<option value="${account.name}">${account.account_name}</option>`);
-					});
-				}
-			}
-		});
-
-		// Load cost centers
-		frappe.call({
-			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_cost_center_list',
-			callback: (r) => {
-				if (r.message) {
-					r.message.forEach(cc => {
-						const option = `<option value="${cc.name}">${cc.cost_center_name}</option>`;
-						$('#cost-center-select').append(option);
-						$('.split-cost-center-select').append(option);
-					});
-				}
-			}
-		});
-	}
-
 	load_transactions() {
 		const me = this;
 		const filters = {
 			batch_id: $('#filter-batch').val(),
 			card_member: $('#filter-card-member').val(),
 			from_date: $('#filter-from-date').val(),
-			to_date: $('#filter-to-date').val()
+			to_date: $('#filter-to-date').val(),
+			keyword: $('#filter-keyword').val()
 		};
 
 		$('#loading-transactions').show();
-		$('#transaction-list').empty();
 		$('#no-transactions').hide();
+		$('#transaction-list').empty();
 
 		frappe.call({
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_pending_transactions',
-			args: { filters: filters },
+			args: { filters: JSON.stringify(filters) },
 			callback: (r) => {
 				$('#loading-transactions').hide();
 				
@@ -190,109 +268,160 @@ class AMEXReviewPage {
 		tbody.empty();
 
 		this.transactions.forEach(trans => {
-			const status_badge = this.get_status_badge(trans.status);
-			const suggestion_indicator = trans.suggestion ? '<i class="fa fa-lightbulb-o text-warning" title="Suggestion available"></i>' : '';
-			
+			const statusClass = {
+				'Pending': 'badge-warning',
+				'Classified': 'badge-info',
+				'Approved': 'badge-success',
+				'Posted': 'badge-secondary'
+			}[trans.status] || 'badge-secondary';
+
 			const row = `
 				<tr class="transaction-row" data-name="${trans.name}">
 					<td>
 						<input type="checkbox" class="transaction-checkbox" value="${trans.name}">
 					</td>
 					<td>${frappe.datetime.str_to_user(trans.transaction_date)}</td>
-					<td>${trans.description} ${suggestion_indicator}</td>
-					<td>${trans.card_member}</td>
-					<td>${frappe.format(trans.amount, {fieldtype: 'Currency'})}</td>
-					<td>${status_badge}</td>
+					<td>${trans.description || ''}</td>
+					<td>${trans.card_member || ''}</td>
+					<td>$${Number(trans.amount).toFixed(2)}</td>
+					<td><span class="badge ${statusClass}">${trans.status}</span></td>
 				</tr>
 			`;
 			tbody.append(row);
 		});
 	}
 
-	get_status_badge(status) {
-		const badges = {
-			'Pending': 'badge-warning',
-			'Classified': 'badge-info',
-			'Approved': 'badge-primary',
-			'Posted': 'badge-success',
-			'Duplicate': 'badge-secondary',
-			'Excluded': 'badge-dark'
-		};
-		const badge_class = badges[status] || 'badge-secondary';
-		return `<span class="badge ${badge_class}">${status}</span>`;
+	update_selected_transactions() {
+		const me = this;
+		this.selected_transactions.clear();
+		
+		$('.transaction-checkbox:checked').each(function() {
+			me.selected_transactions.add($(this).val());
+		});
+
+		const count = this.selected_transactions.size;
+		$('#selected-count').text(count);
+
+		if (count > 1) {
+			$('#bulk-panel').show();
+			$('#classification-panel').hide();
+		} else if (count === 1) {
+			$('#bulk-panel').hide();
+			$('#classification-panel').show();
+		} else {
+			$('#bulk-panel').hide();
+			$('#classification-panel').hide();
+		}
+	}
+
+	bulk_classify_transactions() {
+		const me = this;
+		const transaction_names = Array.from(this.selected_transactions);
+		
+		if (transaction_names.length === 0) {
+			frappe.msgprint('Please select transactions to classify');
+			return;
+		}
+
+		const vendor = me.bulk_vendor_field.get_value();
+		const expense_account = me.bulk_expense_account_field.get_value();
+		const cost_center = me.bulk_cost_center_field.get_value();
+		const notes = $('#bulk-classification-notes').val();
+
+		if (!expense_account) {
+			frappe.msgprint('Please select an Expense Account');
+			return;
+		}
+
+		if (!cost_center) {
+			frappe.msgprint('Please select a Cost Center');
+			return;
+		}
+
+		frappe.call({
+			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.bulk_classify_transactions',
+			args: {
+				transaction_names: JSON.stringify(transaction_names),
+				vendor: vendor,
+				expense_account: expense_account,
+				cost_center: cost_center,
+				notes: notes
+			},
+			callback: (r) => {
+				if (r.message) {
+					const result = r.message;
+					frappe.msgprint(`
+						<strong>Bulk Classification Complete</strong><br>
+						Success: ${result.success_count}<br>
+						Errors: ${result.error_count}<br>
+						Total: ${result.total}
+					`);
+					
+					// Clear selections and reload
+					me.selected_transactions.clear();
+					$('.transaction-checkbox').prop('checked', false);
+					$('#select-all-transactions').prop('checked', false);
+					me.update_selected_transactions();
+					me.load_transactions();
+				}
+			}
+		});
 	}
 
 	load_transaction_details(transaction_name) {
 		const me = this;
+		me.selected_transaction = transaction_name;
 
 		frappe.call({
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_transaction_details',
 			args: { transaction_name: transaction_name },
 			callback: (r) => {
 				if (r.message) {
-					me.selected_transaction = r.message.transaction;
-					me.render_transaction_details(r.message.transaction, r.message.suggestion);
+					me.render_transaction_details(r.message.transaction);
 					$('#classification-panel').show();
 				}
 			}
 		});
 	}
 
-	render_transaction_details(trans, suggestion) {
-		const details_html = `
-			<h6>${trans.description}</h6>
-			<p class="text-muted small">
-				<strong>Reference:</strong> ${trans.reference}<br>
-				<strong>Date:</strong> ${frappe.datetime.str_to_user(trans.transaction_date)}<br>
-				<strong>Card Member:</strong> ${trans.card_member}<br>
-				<strong>Amount:</strong> ${frappe.format(trans.amount, {fieldtype: 'Currency'})}<br>
-				<strong>Category:</strong> ${trans.amex_category || 'N/A'}
-			</p>
-			${suggestion ? this.render_suggestion(suggestion) : ''}
-		`;
-		$('#transaction-details').html(details_html);
-
-		// Populate form with existing data or suggestions
-		if (trans.vendor || (suggestion && suggestion.matched_supplier)) {
-			$('#vendor-select').val(trans.vendor || suggestion.matched_supplier);
-		}
-		
-		if (trans.expense_account || (suggestion && suggestion.default_expense_account)) {
-			$('#expense-account-select').val(trans.expense_account || suggestion.default_expense_account);
-		}
-		
-		if (trans.cost_center || (suggestion && suggestion.default_cost_center)) {
-			$('#cost-center-select').val(trans.cost_center || suggestion.default_cost_center);
-		}
-		
-		$('#classification-notes').val(trans.classification_notes || '');
-
-		// Show appropriate buttons based on status
-		this.update_action_buttons(trans.status);
-
-		// Load splits if present
-		if (trans.cost_center_splits && trans.cost_center_splits.length > 0) {
-			this.toggle_cost_center_type('split');
-			this.load_splits(trans.cost_center_splits);
-		}
-	}
-
-	render_suggestion(suggestion) {
-		return `
-			<div class="alert alert-info small">
-				<i class="fa fa-lightbulb-o"></i> <strong>Suggestion:</strong><br>
-				${suggestion.matched_supplier ? `Vendor: ${suggestion.matched_supplier}<br>` : ''}
-				${suggestion.default_expense_account ? `Account: ${suggestion.default_expense_account}<br>` : ''}
-				${suggestion.default_cost_center ? `Cost Center: ${suggestion.default_cost_center}<br>` : ''}
-				<small>Confidence: ${(suggestion.confidence_score * 100).toFixed(0)}%</small>
+	render_transaction_details(trans) {
+		const detailsHtml = `
+			<div class="detail-row">
+				<span class="detail-label">Reference:</span>
+				<span class="detail-value">${trans.reference || 'N/A'}</span>
+			</div>
+			<div class="detail-row">
+				<span class="detail-label">Date:</span>
+				<span class="detail-value">${frappe.datetime.str_to_user(trans.transaction_date)}</span>
+			</div>
+			<div class="detail-row">
+				<span class="detail-label">Card Member:</span>
+				<span class="detail-value">${trans.card_member || 'N/A'}</span>
+			</div>
+			<div class="detail-row">
+				<span class="detail-label">Amount:</span>
+				<span class="detail-value amount-large">$${Number(trans.amount).toFixed(2)}</span>
+			</div>
+			<div class="detail-row">
+				<span class="detail-label">Category:</span>
+				<span class="detail-value">${trans.amex_category || 'N/A'}</span>
 			</div>
 		`;
-	}
+		$('#transaction-details').html(detailsHtml);
 
-	update_action_buttons(status) {
-		$('#classify-btn').toggle(status === 'Pending');
-		$('#approve-btn').toggle(status === 'Classified');
-		$('#post-btn').toggle(status === 'Approved');
+		// Set current values if classified
+		if (trans.vendor) {
+			this.vendor_field.set_value(trans.vendor);
+		}
+		if (trans.expense_account) {
+			this.expense_account_field.set_value(trans.expense_account);
+		}
+		if (trans.cost_center) {
+			this.cost_center_field.set_value(trans.cost_center);
+		}
+		if (trans.classification_notes) {
+			$('#classification-notes').val(trans.classification_notes);
+		}
 	}
 
 	toggle_cost_center_type(type) {
@@ -306,173 +435,54 @@ class AMEXReviewPage {
 			$('#split-cc-btn').addClass('active');
 			$('#single-cost-center-div').hide();
 			$('#split-cost-centers-div').show();
-			
-			// Add initial split row if empty
-			if ($('#split-table-body tr').length === 0) {
-				this.add_split_row();
-				this.add_split_row();
-			}
 		}
-	}
-
-	add_split_row() {
-		const amount = this.selected_transaction ? this.selected_transaction.amount : 0;
-		const row = `
-			<tr>
-				<td>
-					<select class="form-control form-control-sm split-cost-center-select">
-						<option value="">Select...</option>
-					</select>
-				</td>
-				<td>
-					<input type="number" class="form-control form-control-sm split-amount" step="0.01" placeholder="Amount">
-				</td>
-				<td>
-					<input type="number" class="form-control form-control-sm split-percentage" step="0.01" placeholder="%">
-				</td>
-				<td>
-					<button class="btn btn-sm btn-danger remove-split-btn" type="button">
-						<i class="fa fa-times"></i>
-					</button>
-				</td>
-			</tr>
-		`;
-		
-		$('#split-table-body').append(row);
-
-		// Populate cost centers for new row
-		const last_select = $('#split-table-body tr:last .split-cost-center-select');
-		frappe.call({
-			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.get_cost_center_list',
-			callback: (r) => {
-				if (r.message) {
-					r.message.forEach(cc => {
-						last_select.append(`<option value="${cc.name}">${cc.cost_center_name}</option>`);
-					});
-				}
-			}
-		});
-	}
-
-	load_splits(splits) {
-		$('#split-table-body').empty();
-		splits.forEach(split => {
-			this.add_split_row();
-			const last_row = $('#split-table-body tr:last');
-			last_row.find('.split-cost-center-select').val(split.cost_center);
-			last_row.find('.split-amount').val(split.amount);
-			last_row.find('.split-percentage').val(split.percentage);
-		});
-	}
-
-	calculate_split_totals() {
-		// Calculate totals and remaining
-		let total_amount = 0;
-		let total_percentage = 0;
-
-		$('#split-table-body tr').each(function() {
-			const amount = parseFloat($(this).find('.split-amount').val()) || 0;
-			const percentage = parseFloat($(this).find('.split-percentage').val()) || 0;
-			total_amount += amount;
-			total_percentage += percentage;
-		});
-
-		// Could add visual feedback for totals here
-		console.log('Total amount:', total_amount, 'Total percentage:', total_percentage);
 	}
 
 	classify_transaction() {
 		const me = this;
+		const vendor = me.vendor_field.get_value();
+		const expense_account = me.expense_account_field.get_value();
+		const cost_center = me.cost_center_field.get_value();
+		const notes = $('#classification-notes').val();
 
-		if (!me.selected_transaction) {
-			frappe.msgprint('No transaction selected');
-			return;
-		}
-
-		const expense_account = $('#expense-account-select').val();
 		if (!expense_account) {
-			frappe.msgprint('Please select an expense account');
+			frappe.msgprint('Please select an Expense Account');
 			return;
 		}
 
-		// Gather data
-		const data = {
-			transaction_name: me.selected_transaction.name,
-			vendor: $('#vendor-select').val() || null,
-			expense_account: expense_account,
-			notes: $('#classification-notes').val() || null
-		};
-
-		// Handle cost center allocation
-		if ($('#single-cc-btn').hasClass('active')) {
-			data.cost_center = $('#cost-center-select').val();
-			if (!data.cost_center) {
-				frappe.msgprint('Please select a cost center');
-				return;
-			}
-		} else {
-			// Gather splits
-			const splits = [];
-			$('#split-table-body tr').each(function() {
-				const split = {
-					cost_center: $(this).find('.split-cost-center-select').val(),
-					amount: parseFloat($(this).find('.split-amount').val()) || null,
-					percentage: parseFloat($(this).find('.split-percentage').val()) || null
-				};
-				if (split.cost_center) {
-					splits.push(split);
-				}
-			});
-
-			if (splits.length === 0) {
-				frappe.msgprint('Please add at least one cost center split');
-				return;
-			}
-
-			data.cost_center_splits = splits;
-		}
-
-		// Save classification
 		frappe.call({
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.classify_transaction',
-			args: data,
+			args: {
+				transaction_name: me.selected_transaction,
+				vendor: vendor,
+				expense_account: expense_account,
+				cost_center: cost_center,
+				notes: notes
+			},
 			callback: (r) => {
-				if (r.message && r.message.status === 'success') {
-					frappe.show_alert({message: 'Transaction classified successfully', indicator: 'green'});
+				if (r.message) {
+					frappe.show_alert({message: 'Transaction classified', indicator: 'green'});
 					me.load_transactions();
-					me.load_transaction_details(me.selected_transaction.name);
 				}
 			}
 		});
 	}
 
 	approve_transaction() {
-		const me = this;
-
-		frappe.call({
-			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.approve_transaction',
-			args: { transaction_name: me.selected_transaction.name },
-			callback: (r) => {
-				if (r.message && r.message.status === 'success') {
-					frappe.show_alert({message: 'Transaction approved', indicator: 'green'});
-					me.load_transactions();
-					me.load_transaction_details(me.selected_transaction.name);
-				}
-			}
-		});
+		// Stub for future implementation
+		frappe.msgprint('Approve functionality coming soon');
 	}
 
 	post_transaction() {
 		const me = this;
-
 		frappe.call({
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.post_transaction',
-			args: { transaction_name: me.selected_transaction.name },
+			args: { transaction_name: me.selected_transaction },
 			callback: (r) => {
-				if (r.message && r.message.status === 'success') {
-					frappe.show_alert({message: `Posted to Journal Entry ${r.message.journal_entry}`, indicator: 'green'});
+				if (r.message) {
+					frappe.show_alert({message: 'Posted to Journal Entry', indicator: 'green'});
 					me.load_transactions();
-					me.load_transaction_details(me.selected_transaction.name);
+					$('#classification-panel').hide();
 				}
 			}
 		});
@@ -480,12 +490,11 @@ class AMEXReviewPage {
 
 	mark_as_duplicate() {
 		const me = this;
-
 		frappe.call({
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.mark_as_duplicate',
-			args: { transaction_name: me.selected_transaction.name },
+			args: { transaction_name: me.selected_transaction },
 			callback: (r) => {
-				if (r.message && r.message.status === 'success') {
+				if (r.message) {
 					frappe.show_alert({message: 'Marked as duplicate', indicator: 'orange'});
 					me.load_transactions();
 					$('#classification-panel').hide();
@@ -496,26 +505,24 @@ class AMEXReviewPage {
 
 	bulk_approve_and_post() {
 		const me = this;
-		const selected = Array.from(me.selected_transactions);
-
+		const selected = Array.from(this.selected_transactions);
+		
 		if (selected.length === 0) {
-			frappe.msgprint('Please select transactions to approve and post');
+			frappe.msgprint('Please select transactions to post');
 			return;
 		}
 
 		frappe.confirm(
-			`Approve and post ${selected.length} transaction(s)?`,
+			`Post ${selected.length} transaction(s) to Journal Entries?`,
 			() => {
 				frappe.call({
 					method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.bulk_approve_and_post',
-					args: { transaction_names: selected },
+					args: { transaction_names: JSON.stringify(selected) },
 					callback: (r) => {
 						if (r.message) {
-							const msg = `Posted: ${r.message.posted.length}, Errors: ${r.message.errors.length}`;
-							frappe.msgprint(msg);
-							me.load_transactions();
+							frappe.msgprint(`Posted ${r.message.success_count} transactions`);
 							me.selected_transactions.clear();
-							$('#select-all-transactions').prop('checked', false);
+							me.load_transactions();
 						}
 					}
 				});
@@ -524,8 +531,9 @@ class AMEXReviewPage {
 	}
 
 	create_vendor() {
-		const me = this;
 		const vendor_name = $('#new-vendor-name').val();
+		const supplier_group = $('#new-vendor-group').val();
+		const country = $('#new-vendor-country').val();
 
 		if (!vendor_name) {
 			frappe.msgprint('Please enter vendor name');
@@ -536,31 +544,17 @@ class AMEXReviewPage {
 			method: 'erpnext_amex.amex_integration.page.amex_review.amex_review.create_vendor_quick',
 			args: {
 				vendor_name: vendor_name,
-				supplier_group: $('#new-vendor-group').val(),
-				country: $('#new-vendor-country').val()
+				supplier_group: supplier_group,
+				country: country
 			},
 			callback: (r) => {
-				if (r.message && r.message.status === 'success') {
-					frappe.show_alert({message: 'Vendor created successfully', indicator: 'green'});
+				if (r.message) {
+					frappe.show_alert({message: 'Vendor created', indicator: 'green'});
 					$('#vendor-modal').modal('hide');
-					
-					// Add to dropdown and select
-					$('#vendor-select').append(`<option value="${r.message.supplier}">${vendor_name}</option>`);
-					$('#vendor-select').val(r.message.supplier);
-					
-					// Clear form
-					$('#new-vendor-name').val('');
+					this.vendor_field.set_value(r.message.name);
 				}
 			}
 		});
 	}
-
-	update_selected_transactions() {
-		this.selected_transactions.clear();
-		$('.transaction-checkbox:checked').each((i, el) => {
-			this.selected_transactions.add($(el).val());
-		});
-	}
 }
-
 

@@ -1,0 +1,433 @@
+/* AMEX Review Page Styles - Theme-aware */
+
+.amex-review-page {
+	padding: 0;
+}
+
+/* Use ERPNext's native card styling */
+.amex-review-page .card {
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	box-shadow: var(--card-shadow);
+}
+
+.amex-review-page .card-header {
+	background: var(--bg-color);
+	border-bottom: 1px solid var(--border-color);
+	padding: 12px 15px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.amex-review-page .card-header h5 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+.amex-review-page .card-body {
+	padding: 15px;
+	background: var(--card-bg);
+	color: var(--text-color);
+}
+
+/* Filter Section */
+.filter-section {
+	margin-bottom: 20px;
+}
+
+.filter-section label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 4px;
+	display: block;
+}
+
+.filter-section .form-control {
+	background: var(--control-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+	font-size: 13px;
+}
+
+.filter-section .form-control:focus {
+	background: var(--control-bg);
+	border-color: var(--primary);
+	color: var(--text-color);
+}
+
+/* Transaction Table */
+.amex-review-page .table {
+	color: var(--text-color);
+	font-size: 13px;
+	margin-bottom: 0;
+}
+
+.amex-review-page .table thead th {
+	background: var(--table-header-bg);
+	color: var(--text-muted);
+	font-weight: 600;
+	font-size: 12px;
+	text-transform: uppercase;
+	border-bottom: 1px solid var(--border-color);
+	padding: 8px 10px;
+}
+
+.amex-review-page .table tbody td {
+	padding: 10px;
+	border-bottom: 1px solid var(--border-color);
+	vertical-align: middle;
+}
+
+.amex-review-page .table tbody tr {
+	cursor: pointer;
+	transition: background-color 0.15s;
+}
+
+.amex-review-page .table tbody tr:hover {
+	background-color: var(--highlight-color);
+}
+
+.amex-review-page .table tbody tr.selected {
+	background-color: var(--primary-light);
+}
+
+/* Transaction Row Checkbox */
+.amex-review-page .table tbody tr input[type="checkbox"] {
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+}
+
+/* Status Badges */
+.badge {
+	padding: 4px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	border-radius: 3px;
+}
+
+.badge-warning {
+	background-color: var(--yellow-100);
+	color: var(--yellow-600);
+}
+
+.badge-success {
+	background-color: var(--green-100);
+	color: var(--green-600);
+}
+
+.badge-info {
+	background-color: var(--blue-100);
+	color: var(--blue-600);
+}
+
+.badge-secondary {
+	background-color: var(--gray-100);
+	color: var(--gray-600);
+}
+
+/* Classification Panel and Bulk Panel */
+.amex-classification-panel,
+.amex-bulk-panel {
+	position: sticky;
+	top: 20px;
+}
+
+.amex-bulk-panel .alert-info {
+	font-size: 12px;
+	margin-bottom: 15px;
+	padding: 10px;
+}
+
+.amex-bulk-panel #selected-count {
+	font-weight: 700;
+	color: var(--primary);
+}
+
+.amex-classification-panel .form-group {
+	margin-bottom: 15px;
+}
+
+.amex-classification-panel label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+	display: block;
+}
+
+.amex-classification-panel .form-control,
+.amex-classification-panel .form-select,
+.amex-classification-panel select {
+	background: var(--control-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+	font-size: 13px;
+	padding: 6px 10px;
+	border-radius: var(--border-radius);
+}
+
+.amex-classification-panel .form-control:focus,
+.amex-classification-panel select:focus {
+	background: var(--control-bg);
+	border-color: var(--primary);
+	color: var(--text-color);
+	outline: none;
+	box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* Transaction Details Display */
+.transaction-details {
+	padding: 10px;
+	background: var(--bg-light);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	margin-bottom: 15px;
+	font-size: 13px;
+}
+
+.transaction-details .detail-row {
+	display: flex;
+	margin-bottom: 8px;
+}
+
+.transaction-details .detail-label {
+	font-weight: 600;
+	color: var(--text-muted);
+	min-width: 120px;
+	font-size: 12px;
+}
+
+.transaction-details .detail-value {
+	color: var(--text-color);
+	flex: 1;
+}
+
+.transaction-details .amount-large {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--primary);
+}
+
+/* Cost Center Split Table */
+.amex-split-table {
+	margin-top: 10px;
+}
+
+.amex-split-table .table {
+	font-size: 12px;
+	margin-bottom: 10px;
+}
+
+.amex-split-table .table th {
+	font-size: 11px;
+	padding: 6px 8px;
+}
+
+.amex-split-table .table td {
+	padding: 6px 8px;
+}
+
+.amex-split-table .table td input,
+.amex-split-table .table td select {
+	font-size: 12px;
+	padding: 4px 8px;
+	height: auto;
+}
+
+.amex-split-table .btn-remove-split {
+	padding: 2px 8px;
+	font-size: 11px;
+}
+
+/* Buttons */
+.amex-review-page .btn {
+	font-size: 13px;
+	padding: 6px 12px;
+	border-radius: var(--border-radius);
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.amex-review-page .btn-sm {
+	font-size: 12px;
+	padding: 5px 10px;
+}
+
+.amex-review-page .btn-primary {
+	background: var(--primary);
+	border-color: var(--primary);
+	color: white;
+}
+
+.amex-review-page .btn-primary:hover {
+	background: var(--primary-dark);
+	border-color: var(--primary-dark);
+}
+
+.amex-review-page .btn-success {
+	background: var(--green-500);
+	border-color: var(--green-500);
+	color: white;
+}
+
+.amex-review-page .btn-success:hover {
+	background: var(--green-600);
+	border-color: var(--green-600);
+}
+
+.amex-review-page .btn-warning {
+	background: var(--yellow-500);
+	border-color: var(--yellow-500);
+	color: var(--text-on-yellow);
+}
+
+.amex-review-page .btn-warning:hover {
+	background: var(--yellow-600);
+	border-color: var(--yellow-600);
+}
+
+.amex-review-page .btn-outline-primary {
+	border: 1px solid var(--primary);
+	color: var(--primary);
+	background: transparent;
+}
+
+.amex-review-page .btn-outline-primary:hover,
+.amex-review-page .btn-outline-primary.active {
+	background: var(--primary);
+	color: white;
+}
+
+.amex-review-page .btn-outline-secondary {
+	border: 1px solid var(--border-color);
+	color: var(--text-muted);
+	background: transparent;
+}
+
+.amex-review-page .btn-outline-secondary:hover {
+	background: var(--bg-light);
+	color: var(--text-color);
+}
+
+/* Loading States */
+#loading-transactions,
+#no-transactions {
+	color: var(--text-muted);
+}
+
+#loading-transactions i {
+	color: var(--primary);
+}
+
+/* Input Groups */
+.amex-review-page .input-group .input-group-append .btn {
+	border-left: 0;
+}
+
+/* Modal Overrides */
+.modal-content {
+	background: var(--modal-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+}
+
+.modal-header {
+	background: var(--bg-color);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header .modal-title {
+	color: var(--text-color);
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.modal-header .close {
+	color: var(--text-color);
+	opacity: 0.6;
+}
+
+.modal-header .close:hover {
+	opacity: 1;
+}
+
+.modal-body {
+	background: var(--modal-bg);
+	color: var(--text-color);
+}
+
+.modal-body .form-group label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.modal-body .form-control {
+	background: var(--control-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+}
+
+.modal-body .form-control:focus {
+	background: var(--control-bg);
+	border-color: var(--primary);
+	color: var(--text-color);
+}
+
+.modal-footer {
+	background: var(--bg-color);
+	border-top: 1px solid var(--border-color);
+}
+
+/* Frappe Link Fields in panels */
+.amex-classification-panel .frappe-control,
+.amex-bulk-panel .frappe-control {
+	margin-bottom: 0;
+}
+
+.amex-classification-panel .frappe-control input,
+.amex-bulk-panel .frappe-control input {
+	background: var(--control-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+	font-size: 13px;
+}
+
+.amex-classification-panel .frappe-control input:focus,
+.amex-bulk-panel .frappe-control input:focus {
+	background: var(--control-bg);
+	border-color: var(--primary);
+	color: var(--text-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.amex-review-page .col-md-3,
+	.amex-review-page .col-md-9 {
+		flex: 0 0 100%;
+		max-width: 100%;
+	}
+	
+	.amex-classification-panel,
+	.amex-bulk-panel {
+		position: relative;
+		top: 0;
+		margin-top: 20px;
+	}
+}
+
+/* Dark theme specific overrides (if needed) */
+body[data-theme="dark"] .amex-review-page .table tbody tr:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+
+body[data-theme="dark"] .amex-review-page .transaction-details {
+	background: rgba(255, 255, 255, 0.03);
+}
+

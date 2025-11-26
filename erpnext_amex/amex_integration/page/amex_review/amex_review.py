@@ -37,6 +37,11 @@ def get_pending_transactions(filters=None):
 	if filters.get('max_amount'):
 		conditions.append(f"amount <= {filters['max_amount']}")
 	
+	# Keyword/description filter for bulk operations
+	if filters.get('keyword'):
+		keyword = frappe.db.escape(filters['keyword'])
+		conditions.append(f"(description LIKE '%{keyword}%' OR statement_description LIKE '%{keyword}%')")
+	
 	where_clause = " AND ".join(conditions) if conditions else "1=1"
 	
 	transactions = frappe.db.sql(f"""
@@ -239,11 +244,24 @@ def get_account_list(account_type=None):
 
 @frappe.whitelist()
 def get_cost_center_list():
-	"""Get list of cost centers for dropdown"""
+	"""Get list of cost centers with hierarchy for dropdown"""
 	cost_centers = frappe.get_all('Cost Center',
-		fields=['name', 'cost_center_name', 'parent_cost_center'],
-		order_by='name'
+		filters={'disabled': 0},
+		fields=['name', 'cost_center_name', 'parent_cost_center', 'lft', 'rgt'],
+		order_by='lft'  # Orders by nested set hierarchy
 	)
+	
+	# Add hierarchical display with indentation
+	for cc in cost_centers:
+		# Count parent levels for indentation (using nested set model)
+		level = frappe.db.count('Cost Center', {
+			'lft': ['<', cc.lft],
+			'rgt': ['>', cc.rgt]
+		})
+		cc['indent'] = level
+		# Add visual hierarchy indicators
+		prefix = '  ' * level + ('├─ ' if level > 0 else '')
+		cc['display_name'] = prefix + cc.cost_center_name
 	
 	return cost_centers
 
@@ -260,3 +278,57 @@ def get_supplier_list():
 	return suppliers
 
 
+
+@frappe.whitelist()
+def bulk_classify_transactions(transaction_names, vendor=None, expense_account=None, cost_center=None, notes=None):
+	"""
+	Apply same classification to multiple transactions
+	
+	Args:
+		transaction_names: List of transaction names (JSON string or list)
+		vendor: Supplier name (optional)
+		expense_account: Account name
+		cost_center: Cost Center name
+		notes: Classification notes
+	
+	Returns:
+		Dict with results, success_count, error_count, total
+	"""
+	# Parse JSON if string
+	if isinstance(transaction_names, str):
+		transaction_names = json.loads(transaction_names)
+	
+	results = []
+	success_count = 0
+	error_count = 0
+	
+	for name in transaction_names:
+		try:
+			# Use the existing classify_transaction function
+			classify_transaction(
+				transaction_name=name,
+				vendor=vendor,
+				expense_account=expense_account,
+				cost_center=cost_center,
+				notes=notes
+			)
+			results.append({
+				'name': name,
+				'status': 'success'
+			})
+			success_count += 1
+		except Exception as e:
+			results.append({
+				'name': name,
+				'status': 'error',
+				'error': str(e)
+			})
+			error_count += 1
+			frappe.log_error(f"Bulk classification error for {name}: {str(e)}", "AMEX Bulk Classification")
+	
+	return {
+		'results': results,
+		'success_count': success_count,
+		'error_count': error_count,
+		'total': len(transaction_names)
+	}
