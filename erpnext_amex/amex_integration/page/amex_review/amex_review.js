@@ -67,7 +67,8 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
-							'account_type': 'Expense',
+							'root_type': 'Expense',
+							'is_group': 0,
 							'disabled': 0
 						}
 					};
@@ -118,7 +119,8 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
-							'account_type': 'Expense',
+							'root_type': 'Expense',
+							'is_group': 0,
 							'disabled': 0
 						}
 					};
