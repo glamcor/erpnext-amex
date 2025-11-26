@@ -44,9 +44,7 @@ def create_journal_entry_from_transaction(transaction_doc):
 	# Add credit entry (AMEX Liability)
 	je.append('accounts', {
 		'account': settings.amex_liability_account,
-		'credit_in_account_currency': abs(transaction_doc.amount),
-		'reference_type': 'AMEX Transaction',
-		'reference_name': transaction_doc.name
+		'credit_in_account_currency': abs(transaction_doc.amount)
 	})
 	
 	# Add debit entries (Expense)
@@ -65,8 +63,6 @@ def create_journal_entry_from_transaction(transaction_doc):
 				'debit_in_account_currency': amount,
 				'party_type': 'Supplier' if transaction_doc.vendor else None,
 				'party': transaction_doc.vendor if transaction_doc.vendor else None,
-				'reference_type': 'AMEX Transaction',
-				'reference_name': transaction_doc.name,
 				'user_remark': split.notes or ''
 			})
 	else:
@@ -76,9 +72,7 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'cost_center': transaction_doc.cost_center,
 			'debit_in_account_currency': abs(transaction_doc.amount),
 			'party_type': 'Supplier' if transaction_doc.vendor else None,
-			'party': transaction_doc.vendor if transaction_doc.vendor else None,
-			'reference_type': 'AMEX Transaction',
-			'reference_name': transaction_doc.name
+			'party': transaction_doc.vendor if transaction_doc.vendor else None
 		})
 	
 	# Save and submit
