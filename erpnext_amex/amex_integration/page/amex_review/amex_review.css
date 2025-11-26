@@ -77,6 +77,27 @@
 	padding: 8px 10px;
 }
 
+/* Sortable column headers */
+.amex-review-page .sortable-header {
+	user-select: none;
+	transition: background-color 0.15s, color 0.15s;
+}
+
+.amex-review-page .sortable-header:hover {
+	background: var(--highlight-color);
+	color: var(--text-color);
+}
+
+.amex-review-page .sortable-header .fa-sort {
+	font-size: 10px;
+	opacity: 0.5;
+}
+
+.amex-review-page .sortable-header .sort-indicator {
+	color: var(--primary);
+	opacity: 1;
+}
+
 .amex-review-page .table tbody td {
 	padding: 10px;
 	border-bottom: 1px solid var(--border-color);

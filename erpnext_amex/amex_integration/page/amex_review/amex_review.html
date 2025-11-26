@@ -1,18 +1,4 @@
 <div class="amex-review-page">
-	<div class="page-head flex justify-between">
-		<div>
-			<h3>AMEX Transaction Review</h3>
-		</div>
-		<div class="page-head-actions">
-			<button class="btn btn-primary btn-sm" id="bulk-approve-btn">
-				<span class="fa fa-check"></span> Bulk Approve & Post
-			</button>
-			<button class="btn btn-default btn-sm" id="refresh-btn">
-				<span class="fa fa-refresh"></span> Refresh
-			</button>
-		</div>
-	</div>
-
 	<div class="page-body">
 		<!-- Filters -->
 		<div class="filter-section card" style="margin-bottom: 20px; padding: 15px;">
@@ -54,23 +40,39 @@
 			<div class="row">
 				<div class="col-md-9">
 					<div class="card">
-						<div class="card-header">
-							<h5>Transactions</h5>
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" id="select-all-transactions">
-								<label class="form-check-label" for="select-all-transactions">Select All</label>
+						<div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+							<h5 style="margin: 0;">Transactions</h5>
+							<div style="text-align: right;">
+								<div style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px;">
+									<span id="total-pending-count">0</span> Pending Transactions
+								</div>
+								<div style="font-size: 16px; font-weight: 700; color: var(--orange-500);">
+									Total: <span id="total-pending-amount">$0.00</span>
+								</div>
 							</div>
 						</div>
 						<div class="card-body" style="max-height: 600px; overflow-y: auto;">
 							<table class="table table-hover" id="transaction-table">
 								<thead>
 									<tr>
-										<th width="5%"></th>
-										<th>Date</th>
-										<th>Description</th>
-										<th>Card Member</th>
-										<th>Amount</th>
-										<th>Status</th>
+										<th width="5%">
+											<input type="checkbox" id="select-all-transactions">
+										</th>
+										<th class="sortable-header" data-field="transaction_date" style="cursor: pointer;">
+											Date <i class="fa fa-sort text-muted"></i>
+										</th>
+										<th class="sortable-header" data-field="description" style="cursor: pointer;">
+											Description <i class="fa fa-sort text-muted"></i>
+										</th>
+										<th class="sortable-header" data-field="card_member" style="cursor: pointer;">
+											Card Member <i class="fa fa-sort text-muted"></i>
+										</th>
+										<th class="sortable-header" data-field="amount" style="cursor: pointer;">
+											Amount <i class="fa fa-sort text-muted"></i>
+										</th>
+										<th class="sortable-header" data-field="status" style="cursor: pointer;">
+											Status <i class="fa fa-sort text-muted"></i>
+										</th>
 									</tr>
 								</thead>
 								<tbody id="transaction-list">
@@ -100,17 +102,14 @@
 							</div>
 							
 							<div class="form-group">
-								<label>Vendor/Supplier</label>
 								<div id="bulk-vendor-field"></div>
 							</div>
 
 							<div class="form-group">
-								<label>Expense Account *</label>
 								<div id="bulk-expense-account-field"></div>
 							</div>
 
 							<div class="form-group">
-								<label>Cost Center *</label>
 								<div id="bulk-cost-center-field"></div>
 							</div>
 
@@ -143,7 +142,6 @@
 								<hr>
 								
 								<div class="form-group">
-									<label>Vendor/Supplier</label>
 									<div id="vendor-field"></div>
 									<button class="btn btn-sm btn-outline-secondary" id="create-vendor-btn" type="button" style="margin-top: 5px;">
 										<i class="fa fa-plus"></i> Create New Vendor
@@ -151,7 +149,6 @@
 								</div>
 
 								<div class="form-group">
-									<label>Expense Account *</label>
 									<div id="expense-account-field"></div>
 								</div>
 
@@ -165,7 +162,6 @@
 
 								<!-- Single Cost Center -->
 								<div class="form-group" id="single-cost-center-div">
-									<label>Cost Center *</label>
 									<div id="cost-center-field"></div>
 								</div>
 

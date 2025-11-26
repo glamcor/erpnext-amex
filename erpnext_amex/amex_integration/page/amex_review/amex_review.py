@@ -39,7 +39,8 @@ def get_pending_transactions(filters=None):
 	
 	# Keyword/description filter for bulk operations
 	if filters.get('keyword'):
-		keyword = frappe.db.escape(filters['keyword'])
+		# Escape the keyword but remove the quotes that frappe.db.escape adds
+		keyword = filters['keyword'].replace('%', '%%').replace('_', '\\_')
 		conditions.append(f"(description LIKE '%{keyword}%' OR statement_description LIKE '%{keyword}%')")
 	
 	where_clause = " AND ".join(conditions) if conditions else "1=1"

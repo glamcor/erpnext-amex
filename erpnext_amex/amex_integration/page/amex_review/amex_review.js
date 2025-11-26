@@ -5,8 +5,21 @@ frappe.pages['amex_review'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
+	// Add page buttons
+	page.add_button('Bulk Approve & Post', () => {
+		if (window.amex_review_instance) {
+			window.amex_review_instance.bulk_approve_and_post();
+		}
+	}, {icon: 'fa fa-check'});
+
+	page.add_button('Refresh', () => {
+		if (window.amex_review_instance) {
+			window.amex_review_instance.load_transactions();
+		}
+	}, {icon: 'fa fa-refresh'});
+
 	// Initialize the page
-	new AMEXReviewPage(page);
+	window.amex_review_instance = new AMEXReviewPage(page);
 }
 
 class AMEXReviewPage {
@@ -16,6 +29,8 @@ class AMEXReviewPage {
 		this.selected_transaction = null;
 		this.selected_transactions = new Set();
 		this.keyword_debounce_timer = null;
+		this.sort_field = 'transaction_date';
+		this.sort_order = 'desc';
 		
 		// Load the HTML
 		$(frappe.render_template("amex_review", {})).appendTo(this.page.body);
@@ -135,9 +150,6 @@ class AMEXReviewPage {
 	setup_events() {
 		const me = this;
 
-		// Refresh button
-		$('#refresh-btn').click(() => me.load_transactions());
-
 		// Apply filters
 		$('#apply-filters-btn').click(() => me.load_transactions());
 		
@@ -171,6 +183,12 @@ class AMEXReviewPage {
 			me.update_selected_transactions();
 		});
 
+		// Sortable column headers
+		$(document).on('click', '.sortable-header', function() {
+			const field = $(this).data('field');
+			me.sort_transactions(field);
+		});
+
 		// Cost center allocation type
 		$('#single-cc-btn').click(() => me.toggle_cost_center_type('single'));
 		$('#split-cc-btn').click(() => me.toggle_cost_center_type('split'));
@@ -200,9 +218,6 @@ class AMEXReviewPage {
 
 		// Mark duplicate button
 		$('#mark-duplicate-btn').click(() => me.mark_as_duplicate());
-
-		// Bulk approve button
-		$('#bulk-approve-btn').click(() => me.bulk_approve_and_post());
 		
 		// Bulk classify button
 		$('#bulk-classify-btn').click(() => me.bulk_classify_transactions());
@@ -263,9 +278,72 @@ class AMEXReviewPage {
 		});
 	}
 
+	sort_transactions(field) {
+		// Toggle sort order if clicking same field
+		if (this.sort_field === field) {
+			this.sort_order = this.sort_order === 'asc' ? 'desc' : 'asc';
+		} else {
+			this.sort_field = field;
+			this.sort_order = 'asc';
+		}
+
+		// Sort transactions
+		this.transactions.sort((a, b) => {
+			let aVal = a[field];
+			let bVal = b[field];
+
+			// Handle nulls
+			if (aVal === null || aVal === undefined) aVal = '';
+			if (bVal === null || bVal === undefined) bVal = '';
+
+			// Compare based on type
+			if (field === 'amount') {
+				aVal = Number(aVal);
+				bVal = Number(bVal);
+			} else if (field === 'transaction_date') {
+				aVal = new Date(aVal);
+				bVal = new Date(bVal);
+			} else {
+				aVal = String(aVal).toLowerCase();
+				bVal = String(bVal).toLowerCase();
+			}
+
+			if (this.sort_order === 'asc') {
+				return aVal > bVal ? 1 : -1;
+			} else {
+				return aVal < bVal ? 1 : -1;
+			}
+		});
+
+		this.render_transactions();
+		this.update_sort_indicators();
+	}
+
+	update_sort_indicators() {
+		// Remove all sort indicators
+		$('.sortable-header .sort-indicator').remove();
+
+		// Add indicator to current sorted column
+		const icon = this.sort_order === 'asc' ? 'fa-sort-asc' : 'fa-sort-desc';
+		$(`.sortable-header[data-field="${this.sort_field}"]`)
+			.append(`<i class="fa ${icon} sort-indicator" style="margin-left: 5px;"></i>`);
+	}
+
 	render_transactions() {
 		const tbody = $('#transaction-list');
 		tbody.empty();
+
+		// Calculate total pending amount
+		let total_pending = 0;
+		this.transactions.forEach(trans => {
+			if (trans.status === 'Pending' || trans.status === 'Classified') {
+				total_pending += Number(trans.amount) || 0;
+			}
+		});
+
+		// Update total display
+		$('#total-pending-amount').text(`$${total_pending.toFixed(2)}`);
+		$('#total-pending-count').text(this.transactions.length);
 
 		this.transactions.forEach(trans => {
 			const statusClass = {
@@ -289,6 +367,8 @@ class AMEXReviewPage {
 			`;
 			tbody.append(row);
 		});
+
+		this.update_sort_indicators();
 	}
 
 	update_selected_transactions() {
