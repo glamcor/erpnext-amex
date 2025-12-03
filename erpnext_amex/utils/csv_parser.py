@@ -20,7 +20,6 @@ def parse_amex_csv(file_path, batch_id):
 	transactions = []
 	duplicate_count = 0
 	excluded_count = 0
-	row_number = 0
 	
 	# Get the batch to retrieve the AMEX card account
 	batch = frappe.get_doc('AMEX Import Batch', batch_id)
@@ -31,35 +30,17 @@ def parse_amex_csv(file_path, batch_id):
 			# Read CSV with proper handling of multi-line fields
 			reader = csv.DictReader(csvfile)
 			
-			# Log the column headers for debugging
-			frappe.log_error(f"CSV Headers: {reader.fieldnames}", "AMEX CSV Debug - Headers")
-			
 			for row in reader:
-				row_number += 1
-				
 				# Skip empty rows
 				if not row.get('Date') or not row.get('Amount'):
 					continue
 				
-				# Get reference - try multiple possible column names
-				# AMEX exports vary: some use "Reference", others use "Receipt"
+				# Get reference - try 'Reference' first, fall back to 'Receipt'
 				reference = (
 					row.get('Reference', '') or 
-					row.get("Reference'", '') or 
-					row.get('Reference #', '') or
-					row.get('Receipt', '') or  # Some AMEX exports use Receipt as the unique ID
+					row.get('Receipt', '') or
 					''
 				).strip().replace("'", "")
-				
-				# If still no reference, generate one from date + amount + description hash
-				if not reference:
-					import hashlib
-					date_str = row.get('Date', '')
-					amount_str = row.get('Amount', '')
-					desc_str = row.get('Description', '')[:20]
-					hash_input = f"{date_str}-{amount_str}-{desc_str}"
-					reference = f"GEN-{hashlib.md5(hash_input.encode()).hexdigest()[:12].upper()}"
-					frappe.log_error(f"Row {row_number}: Generated reference {reference} (no Reference in CSV)", "AMEX CSV Debug")
 				
 				# Parse transaction data
 				transaction_data = {
@@ -104,7 +85,7 @@ def parse_amex_csv(file_path, batch_id):
 				})
 				trans_doc.insert(ignore_permissions=True)
 			except Exception as e:
-				frappe.log_error(f"Error creating transaction: {str(e)}", "AMEX Transaction Import Error")
+				frappe.log_error(str(e)[:100], "AMEX Import Error")
 		
 		# Commit the transactions
 		frappe.db.commit()
@@ -119,7 +100,7 @@ def parse_amex_csv(file_path, batch_id):
 		}
 	
 	except Exception as e:
-		frappe.log_error(f"Error parsing CSV: {str(e)}", "CSV Parser Error")
+		frappe.log_error(str(e)[:100], "CSV Parser Error")
 		raise
 
 
@@ -228,4 +209,3 @@ def create_import_batch(csv_file, user):
 	frappe.db.commit()
 	
 	return batch
-
