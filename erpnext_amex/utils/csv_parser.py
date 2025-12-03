@@ -42,11 +42,12 @@ def parse_amex_csv(file_path, batch_id):
 					continue
 				
 				# Get reference - try multiple possible column names
-				# AMEX sometimes exports with "Reference'" (with trailing quote)
+				# AMEX exports vary: some use "Reference", others use "Receipt"
 				reference = (
 					row.get('Reference', '') or 
 					row.get("Reference'", '') or 
 					row.get('Reference #', '') or
+					row.get('Receipt', '') or  # Some AMEX exports use Receipt as the unique ID
 					''
 				).strip().replace("'", "")
 				
