@@ -35,13 +35,6 @@ def parse_amex_csv(file_path, batch_id):
 				if not row.get('Date') or not row.get('Amount'):
 					continue
 				
-				# Get reference - try 'Reference' first, fall back to 'Receipt'
-				reference = (
-					row.get('Reference', '') or 
-					row.get('Receipt', '') or
-					''
-				).strip().replace("'", "")
-				
 				# Parse transaction data
 				transaction_data = {
 					'batch_id': batch_id,
@@ -57,7 +50,7 @@ def parse_amex_csv(file_path, batch_id):
 					'city_state': row.get('City/State', '').strip(),
 					'zip_code': row.get('Zip Code', '').strip(),
 					'country': row.get('Country', '').strip(),
-					'reference': reference,
+					'reference': row.get('Reference', '').strip().replace("'", ""),
 					'amex_category': row.get('Category', '').strip(),
 					'status': 'Pending'
 				}
@@ -85,7 +78,7 @@ def parse_amex_csv(file_path, batch_id):
 				})
 				trans_doc.insert(ignore_permissions=True)
 			except Exception as e:
-				frappe.log_error(str(e)[:100], "AMEX Import Error")
+				frappe.log_error(f"Error creating transaction: {str(e)}", "AMEX Transaction Import Error")
 		
 		# Commit the transactions
 		frappe.db.commit()
@@ -100,7 +93,7 @@ def parse_amex_csv(file_path, batch_id):
 		}
 	
 	except Exception as e:
-		frappe.log_error(str(e)[:100], "CSV Parser Error")
+		frappe.log_error(f"Error parsing CSV: {str(e)}", "CSV Parser Error")
 		raise
 
 
