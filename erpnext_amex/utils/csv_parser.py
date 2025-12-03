@@ -20,6 +20,7 @@ def parse_amex_csv(file_path, batch_id):
 	transactions = []
 	duplicate_count = 0
 	excluded_count = 0
+	row_number = 0
 	
 	# Get the batch to retrieve the AMEX card account
 	batch = frappe.get_doc('AMEX Import Batch', batch_id)
@@ -30,10 +31,34 @@ def parse_amex_csv(file_path, batch_id):
 			# Read CSV with proper handling of multi-line fields
 			reader = csv.DictReader(csvfile)
 			
+			# Log the column headers for debugging
+			frappe.log_error(f"CSV Headers: {reader.fieldnames}", "AMEX CSV Debug - Headers")
+			
 			for row in reader:
+				row_number += 1
+				
 				# Skip empty rows
 				if not row.get('Date') or not row.get('Amount'):
 					continue
+				
+				# Get reference - try multiple possible column names
+				# AMEX sometimes exports with "Reference'" (with trailing quote)
+				reference = (
+					row.get('Reference', '') or 
+					row.get("Reference'", '') or 
+					row.get('Reference #', '') or
+					''
+				).strip().replace("'", "")
+				
+				# If still no reference, generate one from date + amount + description hash
+				if not reference:
+					import hashlib
+					date_str = row.get('Date', '')
+					amount_str = row.get('Amount', '')
+					desc_str = row.get('Description', '')[:20]
+					hash_input = f"{date_str}-{amount_str}-{desc_str}"
+					reference = f"GEN-{hashlib.md5(hash_input.encode()).hexdigest()[:12].upper()}"
+					frappe.log_error(f"Row {row_number}: Generated reference {reference} (no Reference in CSV)", "AMEX CSV Debug")
 				
 				# Parse transaction data
 				transaction_data = {
@@ -50,7 +75,7 @@ def parse_amex_csv(file_path, batch_id):
 					'city_state': row.get('City/State', '').strip(),
 					'zip_code': row.get('Zip Code', '').strip(),
 					'country': row.get('Country', '').strip(),
-					'reference': row.get('Reference', '').strip().replace("'", ""),
+					'reference': reference,
 					'amex_category': row.get('Category', '').strip(),
 					'status': 'Pending'
 				}
