@@ -12,6 +12,8 @@
   "column_break_2",
   "status",
   "batch_reference",
+  "section_break_card_account",
+  "amex_card_account",
   "section_break_4",
   "csv_file",
   "section_break_6",
@@ -58,6 +60,19 @@
    "fieldtype": "Data",
    "label": "Batch Reference",
    "unique": 1
+  },
+  {
+   "fieldname": "section_break_card_account",
+   "fieldtype": "Section Break",
+   "label": "AMEX Card Account"
+  },
+  {
+   "description": "Select the specific AMEX card liability account for this import (e.g., AMEX GG - GGL, AMEX 3017 - GGL)",
+   "fieldname": "amex_card_account",
+   "fieldtype": "Link",
+   "label": "AMEX Card Account",
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_4",

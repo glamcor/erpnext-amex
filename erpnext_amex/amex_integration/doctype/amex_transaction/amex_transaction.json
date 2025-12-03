@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "batch_id",
+  "amex_card_account",
   "transaction_date",
   "column_break_2",
   "status",
@@ -62,6 +63,14 @@
    "label": "Batch ID",
    "options": "AMEX Import Batch",
    "reqd": 1
+  },
+  {
+   "description": "AMEX card liability account (inherited from batch)",
+   "fieldname": "amex_card_account",
+   "fieldtype": "Link",
+   "label": "AMEX Card Account",
+   "options": "Account",
+   "read_only": 1
   },
   {
    "fieldname": "transaction_date",

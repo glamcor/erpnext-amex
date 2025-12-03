@@ -21,6 +21,10 @@ def parse_amex_csv(file_path, batch_id):
 	duplicate_count = 0
 	excluded_count = 0
 	
+	# Get the batch to retrieve the AMEX card account
+	batch = frappe.get_doc('AMEX Import Batch', batch_id)
+	amex_card_account = batch.amex_card_account
+	
 	try:
 		with open(file_path, 'r', encoding='utf-8') as csvfile:
 			# Read CSV with proper handling of multi-line fields
@@ -34,6 +38,7 @@ def parse_amex_csv(file_path, batch_id):
 				# Parse transaction data
 				transaction_data = {
 					'batch_id': batch_id,
+					'amex_card_account': amex_card_account,
 					'transaction_date': parse_date(row.get('Date')),
 					'description': row.get('Description', '').strip(),
 					'card_member': row.get('Card Member', '').strip(),

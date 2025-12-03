@@ -18,8 +18,11 @@ def create_journal_entry_from_transaction(transaction_doc):
 	# Get settings
 	settings = frappe.get_single('AMEX Integration Settings')
 	
-	if not settings.amex_liability_account:
-		frappe.throw("AMEX Liability Account not configured in AMEX Integration Settings")
+	# Use transaction's card account (from batch), fall back to settings if not set
+	amex_liability_account = transaction_doc.amex_card_account or settings.amex_liability_account
+	
+	if not amex_liability_account:
+		frappe.throw("AMEX Card Account not set on transaction and no default configured in AMEX Integration Settings")
 	
 	if not transaction_doc.expense_account:
 		frappe.throw("Expense Account is required")
@@ -41,9 +44,9 @@ def create_journal_entry_from_transaction(transaction_doc):
 	if hasattr(je, 'amex_transaction_reference'):
 		je.amex_transaction_reference = transaction_doc.name
 	
-	# Add credit entry (AMEX Liability)
+	# Add credit entry (AMEX Liability - using transaction's card account)
 	je.append('accounts', {
-		'account': settings.amex_liability_account,
+		'account': amex_liability_account,
 		'credit_in_account_currency': abs(transaction_doc.amount)
 	})
 	
@@ -177,8 +180,10 @@ def validate_journal_entry_data(transaction_doc):
 	"""
 	settings = frappe.get_single('AMEX Integration Settings')
 	
-	if not settings.amex_liability_account:
-		return False, "AMEX Liability Account not configured"
+	# Check for AMEX card account (transaction-level takes priority)
+	amex_liability_account = transaction_doc.amex_card_account or settings.amex_liability_account
+	if not amex_liability_account:
+		return False, "AMEX Card Account not set on transaction and no default configured"
 	
 	if not transaction_doc.expense_account:
 		return False, "Expense Account is required"
