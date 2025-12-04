@@ -390,6 +390,9 @@ class AMEXReviewPage {
 		} else if (count === 1) {
 			$('#bulk-panel').hide();
 			$('#classification-panel').show();
+			// When exactly one checkbox is selected, load its details
+			const transaction_name = Array.from(this.selected_transactions)[0];
+			me.load_transaction_details(transaction_name);
 		} else {
 			$('#bulk-panel').hide();
 			$('#classification-panel').hide();
