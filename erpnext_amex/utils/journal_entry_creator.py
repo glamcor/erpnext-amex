@@ -44,9 +44,17 @@ def create_journal_entry_from_transaction(transaction_doc):
 	if hasattr(je, 'amex_transaction_reference'):
 		je.amex_transaction_reference = transaction_doc.name
 	
+	# Determine the cost center to use (for both sides of the entry)
+	# For splits, we'll use the first split's cost center on the credit side
+	if transaction_doc.cost_center_splits:
+		credit_cost_center = transaction_doc.cost_center_splits[0].cost_center
+	else:
+		credit_cost_center = transaction_doc.cost_center
+	
 	# Add credit entry (AMEX Liability - using transaction's card account)
 	je.append('accounts', {
 		'account': amex_liability_account,
+		'cost_center': credit_cost_center,
 		'credit_in_account_currency': abs(transaction_doc.amount)
 	})
 	
