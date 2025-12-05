@@ -81,7 +81,7 @@ def get_transaction_details(transaction_name):
 
 
 @frappe.whitelist()
-def classify_transaction(transaction_name, vendor=None, expense_account=None, cost_center=None, notes=None, cost_center_splits=None):
+def classify_transaction(transaction_name, vendor=None, expense_account=None, cost_center=None, accounting_class=None, notes=None, cost_center_splits=None):
 	"""
 	Classify a transaction
 	
@@ -90,6 +90,7 @@ def classify_transaction(transaction_name, vendor=None, expense_account=None, co
 		vendor: Supplier name (optional)
 		expense_account: Account name
 		cost_center: Cost Center name (for single allocation)
+		accounting_class: Accounting Class for reporting dimensions
 		notes: Classification notes
 		cost_center_splits: List of splits for multi-center allocation
 	"""
@@ -102,6 +103,8 @@ def classify_transaction(transaction_name, vendor=None, expense_account=None, co
 		transaction.expense_account = expense_account
 	if cost_center:
 		transaction.cost_center = cost_center
+	if accounting_class:
+		transaction.accounting_class = accounting_class
 	if notes:
 		transaction.classification_notes = notes
 	
@@ -281,7 +284,7 @@ def get_supplier_list():
 
 
 @frappe.whitelist()
-def bulk_classify_transactions(transaction_names, vendor=None, expense_account=None, cost_center=None, notes=None):
+def bulk_classify_transactions(transaction_names, vendor=None, expense_account=None, cost_center=None, accounting_class=None, notes=None):
 	"""
 	Apply same classification to multiple transactions
 	
@@ -290,6 +293,7 @@ def bulk_classify_transactions(transaction_names, vendor=None, expense_account=N
 		vendor: Supplier name (optional)
 		expense_account: Account name
 		cost_center: Cost Center name
+		accounting_class: Accounting Class for reporting dimensions
 		notes: Classification notes
 	
 	Returns:
@@ -311,6 +315,7 @@ def bulk_classify_transactions(transaction_names, vendor=None, expense_account=N
 				vendor=vendor,
 				expense_account=expense_account,
 				cost_center=cost_center,
+				accounting_class=accounting_class,
 				notes=notes
 			)
 			results.append({

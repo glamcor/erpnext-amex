@@ -37,6 +37,7 @@
   "vendor",
   "expense_account",
   "cost_center",
+  "accounting_class",
   "column_break_20",
   "classification_notes",
   "classified_by",
@@ -232,6 +233,12 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "accounting_class",
+   "fieldtype": "Link",
+   "label": "Accounting Class",
+   "options": "Accounting Class"
   },
   {
    "fieldname": "column_break_20",

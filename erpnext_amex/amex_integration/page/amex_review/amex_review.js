@@ -96,6 +96,18 @@ class AMEXReviewPage {
 			render_input: true
 		});
 		
+		// Single transaction accounting class field
+		this.accounting_class_field = frappe.ui.form.make_control({
+			parent: $('#accounting-class-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Accounting Class',
+				label: 'Accounting Class',
+				placeholder: 'Type to search...'
+			},
+			render_input: true
+		});
+		
 		// Bulk vendor field
 		this.bulk_vendor_field = frappe.ui.form.make_control({
 			parent: $('#bulk-vendor-field'),
@@ -144,6 +156,18 @@ class AMEXReviewPage {
 						}
 					};
 				}
+			},
+			render_input: true
+		});
+		
+		// Bulk accounting class field
+		this.bulk_accounting_class_field = frappe.ui.form.make_control({
+			parent: $('#bulk-accounting-class-field'),
+			df: {
+				fieldtype: 'Link',
+				options: 'Accounting Class',
+				label: 'Accounting Class',
+				placeholder: 'Type to search...'
 			},
 			render_input: true
 		});
@@ -411,6 +435,7 @@ class AMEXReviewPage {
 		const vendor = me.bulk_vendor_field.get_value();
 		const expense_account = me.bulk_expense_account_field.get_value();
 		const cost_center = me.bulk_cost_center_field.get_value();
+		const accounting_class = me.bulk_accounting_class_field.get_value();
 		const notes = $('#bulk-classification-notes').val();
 
 		if (!expense_account) {
@@ -430,6 +455,7 @@ class AMEXReviewPage {
 				vendor: vendor,
 				expense_account: expense_account,
 				cost_center: cost_center,
+				accounting_class: accounting_class,
 				notes: notes
 			},
 			callback: (r) => {
@@ -504,6 +530,9 @@ class AMEXReviewPage {
 		if (trans.cost_center) {
 			this.cost_center_field.set_value(trans.cost_center);
 		}
+		if (trans.accounting_class) {
+			this.accounting_class_field.set_value(trans.accounting_class);
+		}
 		if (trans.classification_notes) {
 			$('#classification-notes').val(trans.classification_notes);
 		}
@@ -528,6 +557,7 @@ class AMEXReviewPage {
 		const vendor = me.vendor_field.get_value();
 		const expense_account = me.expense_account_field.get_value();
 		const cost_center = me.cost_center_field.get_value();
+		const accounting_class = me.accounting_class_field.get_value();
 		const notes = $('#classification-notes').val();
 
 		if (!expense_account) {
@@ -542,6 +572,7 @@ class AMEXReviewPage {
 				vendor: vendor,
 				expense_account: expense_account,
 				cost_center: cost_center,
+				accounting_class: accounting_class,
 				notes: notes
 			},
 			callback: (r) => {

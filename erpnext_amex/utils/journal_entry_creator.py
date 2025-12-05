@@ -51,12 +51,19 @@ def create_journal_entry_from_transaction(transaction_doc):
 	else:
 		credit_cost_center = transaction_doc.cost_center
 	
-	# Add credit entry (AMEX Liability - using transaction's card account)
-	je.append('accounts', {
+	# Get accounting class (applies to both sides of the entry)
+	accounting_class = getattr(transaction_doc, 'accounting_class', None)
+	
+	# Build credit entry (AMEX Liability - using transaction's card account)
+	credit_entry = {
 		'account': amex_liability_account,
 		'cost_center': credit_cost_center,
 		'credit_in_account_currency': abs(transaction_doc.amount)
-	})
+	}
+	# Add accounting class if set
+	if accounting_class:
+		credit_entry['accounting_class'] = accounting_class
+	je.append('accounts', credit_entry)
 	
 	# Add debit entries (Expense)
 	if transaction_doc.cost_center_splits:
@@ -68,23 +75,31 @@ def create_journal_entry_from_transaction(transaction_doc):
 			if not amount and split.percentage:
 				amount = flt(transaction_doc.amount * split.percentage / 100, 2)
 			
-			je.append('accounts', {
+			debit_entry = {
 				'account': transaction_doc.expense_account,
 				'cost_center': split.cost_center,
 				'debit_in_account_currency': amount,
 				'party_type': 'Supplier' if transaction_doc.vendor else None,
 				'party': transaction_doc.vendor if transaction_doc.vendor else None,
 				'user_remark': split.notes or ''
-			})
+			}
+			# Add accounting class if set
+			if accounting_class:
+				debit_entry['accounting_class'] = accounting_class
+			je.append('accounts', debit_entry)
 	else:
 		# Single cost center
-		je.append('accounts', {
+		debit_entry = {
 			'account': transaction_doc.expense_account,
 			'cost_center': transaction_doc.cost_center,
 			'debit_in_account_currency': abs(transaction_doc.amount),
 			'party_type': 'Supplier' if transaction_doc.vendor else None,
 			'party': transaction_doc.vendor if transaction_doc.vendor else None
-		})
+		}
+		# Add accounting class if set
+		if accounting_class:
+			debit_entry['accounting_class'] = accounting_class
+		je.append('accounts', debit_entry)
 	
 	# Save and submit
 	je.insert(ignore_permissions=True)
