@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "cost_center",
+  "accounting_class",
   "amount",
   "percentage",
   "notes"
@@ -18,6 +19,13 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "fieldname": "accounting_class",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Accounting Class",
+   "options": "Accounting Class"
   },
   {
    "fieldname": "amount",

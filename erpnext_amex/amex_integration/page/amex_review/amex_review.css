@@ -238,32 +238,104 @@
 /* Cost Center Split Table */
 .amex-split-table {
 	margin-top: 10px;
+	background: var(--bg-light);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	padding: 10px;
 }
 
 .amex-split-table .table {
 	font-size: 12px;
 	margin-bottom: 10px;
+	background: transparent;
 }
 
 .amex-split-table .table th {
-	font-size: 11px;
-	padding: 6px 8px;
+	font-size: 10px;
+	padding: 6px 4px;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .amex-split-table .table td {
-	padding: 6px 8px;
+	padding: 6px 4px;
+	vertical-align: middle;
+	border-bottom: 1px solid var(--border-color);
 }
 
-.amex-split-table .table td input,
-.amex-split-table .table td select {
+.amex-split-table .table td input {
 	font-size: 12px;
-	padding: 4px 8px;
+	padding: 4px 6px;
 	height: auto;
+	background: var(--control-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-color);
+	border-radius: var(--border-radius-sm);
+	width: 100%;
 }
 
-.amex-split-table .btn-remove-split {
-	padding: 2px 8px;
+.amex-split-table .table td input:focus {
+	border-color: var(--primary);
+	outline: none;
+}
+
+/* Frappe Link fields in split rows */
+.amex-split-table .split-cc-container,
+.amex-split-table .split-class-container {
+	min-width: 100px;
+}
+
+.amex-split-table .frappe-control {
+	margin-bottom: 0;
+}
+
+.amex-split-table .frappe-control .control-input-wrapper {
+	margin-bottom: 0;
+}
+
+.amex-split-table .frappe-control input {
+	font-size: 11px !important;
+	padding: 4px 6px !important;
+	height: auto !important;
+}
+
+.amex-split-table .frappe-control .link-btn {
+	display: none;
+}
+
+/* Split totals row */
+.amex-split-table .split-totals-row {
+	background: var(--bg-color);
+}
+
+.amex-split-table .split-totals-row td {
+	border-top: 2px solid var(--border-color);
+	border-bottom: none;
+}
+
+/* Remove button in split rows */
+.amex-split-table .remove-split-btn {
+	padding: 2px 6px;
+	font-size: 10px;
+}
+
+.amex-split-table .btn-outline-danger {
+	border-color: var(--red-300);
+	color: var(--red-500);
+}
+
+.amex-split-table .btn-outline-danger:hover {
+	background: var(--red-500);
+	color: white;
+}
+
+/* Validation message */
+#split-validation-msg {
 	font-size: 11px;
+	padding: 5px 8px;
+	background: var(--red-50);
+	border-radius: var(--border-radius-sm);
 }
 
 /* Buttons */

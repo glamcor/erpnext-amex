@@ -165,34 +165,44 @@
 								</div>
 
 								<!-- Single Cost Center -->
-								<div class="form-group" id="single-cost-center-div">
-									<div id="cost-center-field"></div>
-								</div>
-
-								<div class="form-group">
-									<div id="accounting-class-field"></div>
+								<div id="single-cost-center-div">
+									<div class="form-group">
+										<div id="cost-center-field"></div>
+									</div>
+									<div class="form-group">
+										<div id="accounting-class-field"></div>
+									</div>
 								</div>
 
 								<!-- Split Cost Centers -->
 								<div id="split-cost-centers-div" style="display: none;">
-									<label>Cost Center Splits</label>
 									<div class="amex-split-table">
 										<table class="table table-sm" id="split-table">
 											<thead>
 												<tr>
-													<th>Cost Center</th>
-													<th>Amount</th>
-													<th>%</th>
-													<th></th>
+													<th style="width: 30%;">Cost Center</th>
+													<th style="width: 30%;">Class</th>
+													<th style="width: 15%;">Amount</th>
+													<th style="width: 15%;">%</th>
+													<th style="width: 10%;"></th>
 												</tr>
 											</thead>
 											<tbody id="split-table-body">
 												<!-- Split rows will be added here -->
 											</tbody>
+											<tfoot>
+												<tr class="split-totals-row">
+													<td colspan="2"><strong>Total</strong></td>
+													<td><strong id="split-total-amount">$0.00</strong></td>
+													<td><strong id="split-total-percent">0%</strong></td>
+													<td></td>
+												</tr>
+											</tfoot>
 										</table>
-										<button class="btn btn-sm btn-outline-primary" id="add-split-btn">
+										<button class="btn btn-sm btn-outline-primary" id="add-split-btn" type="button">
 											<i class="fa fa-plus"></i> Add Split
 										</button>
+										<div id="split-validation-msg" class="text-danger" style="margin-top: 10px; display: none;"></div>
 									</div>
 								</div>
 

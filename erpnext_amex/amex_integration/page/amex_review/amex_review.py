@@ -90,29 +90,52 @@ def classify_transaction(transaction_name, vendor=None, expense_account=None, co
 		vendor: Supplier name (optional)
 		expense_account: Account name
 		cost_center: Cost Center name (for single allocation)
-		accounting_class: Accounting Class for reporting dimensions
+		accounting_class: Accounting Class for reporting dimensions (for single allocation)
 		notes: Classification notes
-		cost_center_splits: List of splits for multi-center allocation
+		cost_center_splits: JSON string or list of splits for multi-center allocation
+			Each split can have: cost_center, accounting_class, amount, percentage
 	"""
 	transaction = frappe.get_doc('AMEX Transaction', transaction_name)
 	
 	# Update classification
 	if vendor:
 		transaction.vendor = vendor
+	else:
+		transaction.vendor = None
+		
 	if expense_account:
 		transaction.expense_account = expense_account
-	if cost_center:
-		transaction.cost_center = cost_center
-	if accounting_class:
-		transaction.accounting_class = accounting_class
-	if notes:
-		transaction.classification_notes = notes
 	
-	# Handle splits
+	# Handle splits vs single cost center
 	if cost_center_splits:
+		# Parse JSON if string
+		if isinstance(cost_center_splits, str):
+			cost_center_splits = json.loads(cost_center_splits)
+		
+		# Clear single cost center fields when using splits
+		transaction.cost_center = None
+		transaction.accounting_class = None
+		
+		# Clear existing splits and add new ones
 		transaction.cost_center_splits = []
 		for split in cost_center_splits:
-			transaction.append('cost_center_splits', split)
+			transaction.append('cost_center_splits', {
+				'cost_center': split.get('cost_center'),
+				'accounting_class': split.get('accounting_class'),
+				'amount': split.get('amount'),
+				'percentage': split.get('percentage')
+			})
+	else:
+		# Single cost center - clear any existing splits
+		transaction.cost_center_splits = []
+		
+		if cost_center:
+			transaction.cost_center = cost_center
+		if accounting_class:
+			transaction.accounting_class = accounting_class
+	
+	if notes:
+		transaction.classification_notes = notes
 	
 	transaction.classified_by = frappe.session.user
 	transaction.classification_date = frappe.utils.now()

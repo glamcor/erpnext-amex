@@ -44,36 +44,35 @@ def create_journal_entry_from_transaction(transaction_doc):
 	if hasattr(je, 'amex_transaction_reference'):
 		je.amex_transaction_reference = transaction_doc.name
 	
-	# Determine the cost center to use (for both sides of the entry)
-	# For splits, we'll use the first split's cost center on the credit side
-	if transaction_doc.cost_center_splits:
-		credit_cost_center = transaction_doc.cost_center_splits[0].cost_center
-	else:
-		credit_cost_center = transaction_doc.cost_center
-	
-	# Get accounting class (applies to both sides of the entry)
-	accounting_class = getattr(transaction_doc, 'accounting_class', None)
-	
-	# Build credit entry (AMEX Liability - using transaction's card account)
-	credit_entry = {
-		'account': amex_liability_account,
-		'cost_center': credit_cost_center,
-		'credit_in_account_currency': abs(transaction_doc.amount)
-	}
-	# Add accounting class if set
-	if accounting_class:
-		credit_entry['accounting_class'] = accounting_class
-	je.append('accounts', credit_entry)
-	
-	# Add debit entries (Expense)
-	if transaction_doc.cost_center_splits:
+	# Add debit entries (Expense) and determine credit entry details
+	if transaction_doc.cost_center_splits and len(transaction_doc.cost_center_splits) > 0:
 		# Multiple cost centers (split allocation)
+		# Each split has its own cost center and accounting class
+		
+		# For the credit side, use the first split's cost center and accounting class
+		first_split = transaction_doc.cost_center_splits[0]
+		credit_cost_center = first_split.cost_center
+		credit_accounting_class = getattr(first_split, 'accounting_class', None)
+		
+		# Build credit entry (AMEX Liability)
+		credit_entry = {
+			'account': amex_liability_account,
+			'cost_center': credit_cost_center,
+			'credit_in_account_currency': abs(transaction_doc.amount)
+		}
+		if credit_accounting_class:
+			credit_entry['accounting_class'] = credit_accounting_class
+		je.append('accounts', credit_entry)
+		
+		# Add debit entries - one per split, each with its own accounting class
 		for split in transaction_doc.cost_center_splits:
 			amount = split.amount or 0
 			
 			# Calculate amount from percentage if amount not provided
 			if not amount and split.percentage:
 				amount = flt(transaction_doc.amount * split.percentage / 100, 2)
+			
+			split_accounting_class = getattr(split, 'accounting_class', None)
 			
 			debit_entry = {
 				'account': transaction_doc.expense_account,
@@ -83,12 +82,26 @@ def create_journal_entry_from_transaction(transaction_doc):
 				'party': transaction_doc.vendor if transaction_doc.vendor else None,
 				'user_remark': split.notes or ''
 			}
-			# Add accounting class if set
-			if accounting_class:
-				debit_entry['accounting_class'] = accounting_class
+			# Add accounting class from the split (each line gets its own class)
+			if split_accounting_class:
+				debit_entry['accounting_class'] = split_accounting_class
 			je.append('accounts', debit_entry)
 	else:
-		# Single cost center
+		# Single cost center - use transaction-level accounting class
+		credit_cost_center = transaction_doc.cost_center
+		accounting_class = getattr(transaction_doc, 'accounting_class', None)
+		
+		# Build credit entry (AMEX Liability)
+		credit_entry = {
+			'account': amex_liability_account,
+			'cost_center': credit_cost_center,
+			'credit_in_account_currency': abs(transaction_doc.amount)
+		}
+		if accounting_class:
+			credit_entry['accounting_class'] = accounting_class
+		je.append('accounts', credit_entry)
+		
+		# Single debit entry
 		debit_entry = {
 			'account': transaction_doc.expense_account,
 			'cost_center': transaction_doc.cost_center,
@@ -96,7 +109,6 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'party_type': 'Supplier' if transaction_doc.vendor else None,
 			'party': transaction_doc.vendor if transaction_doc.vendor else None
 		}
-		# Add accounting class if set
 		if accounting_class:
 			debit_entry['accounting_class'] = accounting_class
 		je.append('accounts', debit_entry)

@@ -31,6 +31,9 @@ class AMEXReviewPage {
 		this.keyword_debounce_timer = null;
 		this.sort_field = 'transaction_date';
 		this.sort_order = 'desc';
+		this.current_transaction_amount = 0;
+		this.split_row_counter = 0;
+		this.split_fields = {}; // Store Frappe Link field instances for splits
 		
 		// Load the HTML
 		$(frappe.render_template("amex_review", {})).appendTo(this.page.body);
@@ -496,6 +499,9 @@ class AMEXReviewPage {
 	}
 
 	render_transaction_details(trans) {
+		// Store current transaction amount for split calculations
+		this.current_transaction_amount = Math.abs(Number(trans.amount) || 0);
+		
 		const detailsHtml = `
 			<div class="detail-row">
 				<span class="detail-label">Reference:</span>
@@ -511,7 +517,7 @@ class AMEXReviewPage {
 			</div>
 			<div class="detail-row">
 				<span class="detail-label">Amount:</span>
-				<span class="detail-value amount-large">$${Number(trans.amount).toFixed(2)}</span>
+				<span class="detail-value amount-large">$${this.current_transaction_amount.toFixed(2)}</span>
 			</div>
 			<div class="detail-row">
 				<span class="detail-label">Category:</span>
@@ -519,6 +525,17 @@ class AMEXReviewPage {
 			</div>
 		`;
 		$('#transaction-details').html(detailsHtml);
+
+		// Reset form fields
+		this.vendor_field.set_value('');
+		this.expense_account_field.set_value('');
+		this.cost_center_field.set_value('');
+		this.accounting_class_field.set_value('');
+		$('#classification-notes').val('');
+		
+		// Reset to single cost center mode
+		this.toggle_cost_center_type('single');
+		this.clear_split_rows();
 
 		// Set current values if classified
 		if (trans.vendor) {
@@ -536,6 +553,29 @@ class AMEXReviewPage {
 		if (trans.classification_notes) {
 			$('#classification-notes').val(trans.classification_notes);
 		}
+		
+		// Load existing splits if any
+		if (trans.cost_center_splits && trans.cost_center_splits.length > 0) {
+			this.toggle_cost_center_type('split');
+			trans.cost_center_splits.forEach(split => {
+				this.add_split_row();
+				const row_id = this.split_row_counter;
+				
+				if (split.cost_center) {
+					this.split_fields[`cc_${row_id}`].set_value(split.cost_center);
+				}
+				if (split.accounting_class) {
+					this.split_fields[`class_${row_id}`].set_value(split.accounting_class);
+				}
+				if (split.amount) {
+					$(`.split-amount[data-row-id="${row_id}"]`).val(split.amount);
+				}
+				if (split.percentage) {
+					$(`.split-percentage[data-row-id="${row_id}"]`).val(split.percentage);
+				}
+			});
+			this.calculate_split_totals();
+		}
 	}
 
 	toggle_cost_center_type(type) {
@@ -549,20 +589,201 @@ class AMEXReviewPage {
 			$('#split-cc-btn').addClass('active');
 			$('#single-cost-center-div').hide();
 			$('#split-cost-centers-div').show();
+			
+			// Add initial split row if none exist
+			if ($('#split-table-body tr').length === 0) {
+				this.add_split_row();
+			}
 		}
+	}
+
+	add_split_row() {
+		const me = this;
+		const row_id = ++this.split_row_counter;
+		
+		const row_html = `
+			<tr class="split-row" data-row-id="${row_id}">
+				<td>
+					<div id="split-cc-field-${row_id}" class="split-cc-container"></div>
+				</td>
+				<td>
+					<div id="split-class-field-${row_id}" class="split-class-container"></div>
+				</td>
+				<td>
+					<input type="number" class="form-control form-control-sm split-amount" 
+					       data-row-id="${row_id}" step="0.01" placeholder="0.00">
+				</td>
+				<td>
+					<input type="number" class="form-control form-control-sm split-percentage" 
+					       data-row-id="${row_id}" step="0.01" placeholder="0" max="100">
+				</td>
+				<td>
+					<button type="button" class="btn btn-sm btn-outline-danger remove-split-btn" data-row-id="${row_id}">
+						<i class="fa fa-times"></i>
+					</button>
+				</td>
+			</tr>
+		`;
+		
+		$('#split-table-body').append(row_html);
+		
+		// Create Frappe Link field for Cost Center
+		this.split_fields[`cc_${row_id}`] = frappe.ui.form.make_control({
+			parent: $(`#split-cc-field-${row_id}`),
+			df: {
+				fieldtype: 'Link',
+				options: 'Cost Center',
+				placeholder: 'Cost Center',
+				get_query: () => {
+					return {
+						filters: { 'disabled': 0 }
+					};
+				}
+			},
+			render_input: true
+		});
+		
+		// Create Frappe Link field for Accounting Class
+		this.split_fields[`class_${row_id}`] = frappe.ui.form.make_control({
+			parent: $(`#split-class-field-${row_id}`),
+			df: {
+				fieldtype: 'Link',
+				options: 'Accounting Class',
+				placeholder: 'Class'
+			},
+			render_input: true
+		});
+		
+		// Bind percentage change to auto-calculate amount
+		$(`.split-percentage[data-row-id="${row_id}"]`).on('input', function() {
+			const pct = parseFloat($(this).val()) || 0;
+			const amount = (me.current_transaction_amount * pct / 100).toFixed(2);
+			$(`.split-amount[data-row-id="${row_id}"]`).val(amount);
+			me.calculate_split_totals();
+		});
+		
+		// Bind amount change to auto-calculate percentage
+		$(`.split-amount[data-row-id="${row_id}"]`).on('input', function() {
+			const amt = parseFloat($(this).val()) || 0;
+			if (me.current_transaction_amount > 0) {
+				const pct = (amt / me.current_transaction_amount * 100).toFixed(2);
+				$(`.split-percentage[data-row-id="${row_id}"]`).val(pct);
+			}
+			me.calculate_split_totals();
+		});
+	}
+
+	calculate_split_totals() {
+		let total_amount = 0;
+		let total_percent = 0;
+		
+		$('.split-amount').each(function() {
+			total_amount += parseFloat($(this).val()) || 0;
+		});
+		
+		$('.split-percentage').each(function() {
+			total_percent += parseFloat($(this).val()) || 0;
+		});
+		
+		$('#split-total-amount').text(`$${total_amount.toFixed(2)}`);
+		$('#split-total-percent').text(`${total_percent.toFixed(1)}%`);
+		
+		// Validate totals
+		const is_valid = Math.abs(total_amount - this.current_transaction_amount) < 0.01 || 
+		                 Math.abs(total_percent - 100) < 0.1;
+		
+		if (!is_valid && total_amount > 0) {
+			const remaining = this.current_transaction_amount - total_amount;
+			$('#split-validation-msg')
+				.text(`Remaining: $${remaining.toFixed(2)} (${(100 - total_percent).toFixed(1)}%)`)
+				.show();
+		} else {
+			$('#split-validation-msg').hide();
+		}
+		
+		return is_valid;
+	}
+
+	get_split_data() {
+		const splits = [];
+		const me = this;
+		
+		$('.split-row').each(function() {
+			const row_id = $(this).data('row-id');
+			const cost_center = me.split_fields[`cc_${row_id}`]?.get_value();
+			const accounting_class = me.split_fields[`class_${row_id}`]?.get_value();
+			const amount = parseFloat($(`.split-amount[data-row-id="${row_id}"]`).val()) || 0;
+			const percentage = parseFloat($(`.split-percentage[data-row-id="${row_id}"]`).val()) || 0;
+			
+			if (cost_center && (amount > 0 || percentage > 0)) {
+				splits.push({
+					cost_center: cost_center,
+					accounting_class: accounting_class || null,
+					amount: amount,
+					percentage: percentage
+				});
+			}
+		});
+		
+		return splits;
+	}
+
+	clear_split_rows() {
+		// Clear all split field references
+		for (const key in this.split_fields) {
+			if (this.split_fields[key] && this.split_fields[key].$wrapper) {
+				this.split_fields[key].$wrapper.remove();
+			}
+		}
+		this.split_fields = {};
+		this.split_row_counter = 0;
+		$('#split-table-body').empty();
+		$('#split-total-amount').text('$0.00');
+		$('#split-total-percent').text('0%');
+		$('#split-validation-msg').hide();
 	}
 
 	classify_transaction() {
 		const me = this;
 		const vendor = me.vendor_field.get_value();
 		const expense_account = me.expense_account_field.get_value();
-		const cost_center = me.cost_center_field.get_value();
-		const accounting_class = me.accounting_class_field.get_value();
 		const notes = $('#classification-notes').val();
+		
+		// Check if using split or single cost center
+		const is_split = $('#split-cc-btn').hasClass('active');
 
 		if (!expense_account) {
 			frappe.msgprint('Please select an Expense Account');
 			return;
+		}
+
+		let cost_center = null;
+		let accounting_class = null;
+		let cost_center_splits = null;
+
+		if (is_split) {
+			// Get split data
+			cost_center_splits = me.get_split_data();
+			
+			if (cost_center_splits.length === 0) {
+				frappe.msgprint('Please add at least one cost center split');
+				return;
+			}
+			
+			// Validate splits total
+			if (!me.calculate_split_totals()) {
+				frappe.msgprint('Split amounts must equal the transaction amount (or percentages must equal 100%)');
+				return;
+			}
+		} else {
+			// Single cost center
+			cost_center = me.cost_center_field.get_value();
+			accounting_class = me.accounting_class_field.get_value();
+			
+			if (!cost_center) {
+				frappe.msgprint('Please select a Cost Center');
+				return;
+			}
 		}
 
 		frappe.call({
@@ -573,6 +794,7 @@ class AMEXReviewPage {
 				expense_account: expense_account,
 				cost_center: cost_center,
 				accounting_class: accounting_class,
+				cost_center_splits: cost_center_splits ? JSON.stringify(cost_center_splits) : null,
 				notes: notes
 			},
 			callback: (r) => {
