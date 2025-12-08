@@ -5,6 +5,28 @@ import frappe
 from frappe.utils import nowdate, flt
 
 
+def has_accounting_class_field():
+	"""Check if accounting_class field exists on Journal Entry Account"""
+	try:
+		return frappe.db.exists('Custom Field', {
+			'dt': 'Journal Entry Account',
+			'fieldname': 'accounting_class'
+		}) or frappe.db.has_column('Journal Entry Account', 'accounting_class')
+	except Exception:
+		return False
+
+
+def get_account_type(account):
+	"""Get the account type for a given account"""
+	return frappe.db.get_value('Account', account, 'account_type')
+
+
+def is_payable_receivable_account(account):
+	"""Check if account is Payable or Receivable type"""
+	account_type = get_account_type(account)
+	return account_type in ('Payable', 'Receivable')
+
+
 def create_journal_entry_from_transaction(transaction_doc):
 	"""
 	Create a Journal Entry from an AMEX Transaction
@@ -31,14 +53,21 @@ def create_journal_entry_from_transaction(transaction_doc):
 	if settings.require_vendor_for_posting and not transaction_doc.vendor:
 		frappe.throw("Vendor is required for posting")
 	
+	# Check if AMEX liability account requires party (Payable/Receivable accounts do)
+	amex_account_needs_party = is_payable_receivable_account(amex_liability_account)
+	
+	# Check if accounting_class field exists
+	use_accounting_class = has_accounting_class_field()
+	
 	# Create Journal Entry
-	je = frappe.get_doc({
+	je_data = {
 		'doctype': 'Journal Entry',
 		'posting_date': transaction_doc.transaction_date or nowdate(),
 		'company': frappe.defaults.get_user_default('Company'),
-		'user_remark': get_journal_entry_remark(transaction_doc),
-		'amex_transaction_reference': transaction_doc.name
-	})
+		'user_remark': get_journal_entry_remark(transaction_doc)
+	}
+	
+	je = frappe.get_doc(je_data)
 	
 	# Add custom field link if it exists
 	if hasattr(je, 'amex_transaction_reference'):
@@ -52,7 +81,7 @@ def create_journal_entry_from_transaction(transaction_doc):
 		# For the credit side, use the first split's cost center and accounting class
 		first_split = transaction_doc.cost_center_splits[0]
 		credit_cost_center = first_split.cost_center
-		credit_accounting_class = getattr(first_split, 'accounting_class', None)
+		credit_accounting_class = getattr(first_split, 'accounting_class', None) if use_accounting_class else None
 		
 		# Build credit entry (AMEX Liability)
 		credit_entry = {
@@ -60,7 +89,15 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'cost_center': credit_cost_center,
 			'credit_in_account_currency': abs(transaction_doc.amount)
 		}
-		if credit_accounting_class:
+		
+		# Add party info if AMEX account is Payable type (requires Supplier)
+		if amex_account_needs_party:
+			# Use "American Express" supplier or create a generic one
+			amex_supplier = get_or_create_amex_supplier()
+			credit_entry['party_type'] = 'Supplier'
+			credit_entry['party'] = amex_supplier
+		
+		if credit_accounting_class and use_accounting_class:
 			credit_entry['accounting_class'] = credit_accounting_class
 		je.append('accounts', credit_entry)
 		
@@ -72,7 +109,7 @@ def create_journal_entry_from_transaction(transaction_doc):
 			if not amount and split.percentage:
 				amount = flt(transaction_doc.amount * split.percentage / 100, 2)
 			
-			split_accounting_class = getattr(split, 'accounting_class', None)
+			split_accounting_class = getattr(split, 'accounting_class', None) if use_accounting_class else None
 			
 			debit_entry = {
 				'account': transaction_doc.expense_account,
@@ -83,13 +120,13 @@ def create_journal_entry_from_transaction(transaction_doc):
 				'user_remark': split.notes or ''
 			}
 			# Add accounting class from the split (each line gets its own class)
-			if split_accounting_class:
+			if split_accounting_class and use_accounting_class:
 				debit_entry['accounting_class'] = split_accounting_class
 			je.append('accounts', debit_entry)
 	else:
 		# Single cost center - use transaction-level accounting class
 		credit_cost_center = transaction_doc.cost_center
-		accounting_class = getattr(transaction_doc, 'accounting_class', None)
+		accounting_class = getattr(transaction_doc, 'accounting_class', None) if use_accounting_class else None
 		
 		# Build credit entry (AMEX Liability)
 		credit_entry = {
@@ -97,7 +134,14 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'cost_center': credit_cost_center,
 			'credit_in_account_currency': abs(transaction_doc.amount)
 		}
-		if accounting_class:
+		
+		# Add party info if AMEX account is Payable type (requires Supplier)
+		if amex_account_needs_party:
+			amex_supplier = get_or_create_amex_supplier()
+			credit_entry['party_type'] = 'Supplier'
+			credit_entry['party'] = amex_supplier
+		
+		if accounting_class and use_accounting_class:
 			credit_entry['accounting_class'] = accounting_class
 		je.append('accounts', credit_entry)
 		
@@ -109,7 +153,7 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'party_type': 'Supplier' if transaction_doc.vendor else None,
 			'party': transaction_doc.vendor if transaction_doc.vendor else None
 		}
-		if accounting_class:
+		if accounting_class and use_accounting_class:
 			debit_entry['accounting_class'] = accounting_class
 		je.append('accounts', debit_entry)
 	
@@ -119,6 +163,31 @@ def create_journal_entry_from_transaction(transaction_doc):
 	frappe.db.commit()
 	
 	return je
+
+
+def get_or_create_amex_supplier():
+	"""Get or create an American Express supplier for liability entries"""
+	supplier_name = "American Express"
+	
+	if frappe.db.exists('Supplier', supplier_name):
+		return supplier_name
+	
+	# Try to find by supplier_name field
+	existing = frappe.db.get_value('Supplier', {'supplier_name': supplier_name}, 'name')
+	if existing:
+		return existing
+	
+	# Create the supplier
+	supplier = frappe.get_doc({
+		'doctype': 'Supplier',
+		'supplier_name': supplier_name,
+		'supplier_group': frappe.db.get_single_value('Buying Settings', 'supplier_group') or 'All Supplier Groups',
+		'supplier_type': 'Company'
+	})
+	supplier.insert(ignore_permissions=True)
+	frappe.db.commit()
+	
+	return supplier.name
 
 
 def create_bulk_journal_entries(transaction_list):
