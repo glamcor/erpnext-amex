@@ -28,6 +28,7 @@
    "options": "Accounting Class"
   },
   {
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -35,6 +36,7 @@
    "precision": "2"
   },
   {
+   "columns": 2,
    "fieldname": "percentage",
    "fieldtype": "Percent",
    "in_list_view": 1,

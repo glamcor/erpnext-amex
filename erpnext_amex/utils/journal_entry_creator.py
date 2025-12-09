@@ -59,11 +59,14 @@ def create_journal_entry_from_transaction(transaction_doc):
 	# Check if accounting_class field exists
 	use_accounting_class = has_accounting_class_field()
 	
+	# Get company from settings
+	company = settings.default_company or frappe.defaults.get_user_default('Company')
+	
 	# Create Journal Entry
 	je_data = {
 		'doctype': 'Journal Entry',
 		'posting_date': transaction_doc.transaction_date or nowdate(),
-		'company': frappe.defaults.get_user_default('Company'),
+		'company': company,
 		'user_remark': get_journal_entry_remark(transaction_doc)
 	}
 	
@@ -90,24 +93,46 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'credit_in_account_currency': abs(transaction_doc.amount)
 		}
 		
-		# Add party info if AMEX account is Payable type (requires Supplier)
+		# Add party info if AMEX account is Payable type
+		# Use transaction vendor if available, otherwise fall back to "American Express"
 		if amex_account_needs_party:
-			# Use "American Express" supplier or create a generic one
-			amex_supplier = get_or_create_amex_supplier()
-			credit_entry['party_type'] = 'Supplier'
-			credit_entry['party'] = amex_supplier
+			if transaction_doc.vendor:
+				credit_entry['party_type'] = 'Supplier'
+				credit_entry['party'] = transaction_doc.vendor
+			else:
+				amex_supplier = get_or_create_amex_supplier()
+				credit_entry['party_type'] = 'Supplier'
+				credit_entry['party'] = amex_supplier
 		
 		if credit_accounting_class and use_accounting_class:
 			credit_entry['accounting_class'] = credit_accounting_class
 		je.append('accounts', credit_entry)
 		
 		# Add debit entries - one per split, each with its own accounting class
-		for split in transaction_doc.cost_center_splits:
-			amount = split.amount or 0
+		# NO party on expense lines (vendor tracked on credit line)
+		# 
+		# Handle percentage splits carefully to avoid rounding errors:
+		# Calculate all splits except the last, then assign remainder to the last split
+		splits = list(transaction_doc.cost_center_splits)
+		total_amount = abs(transaction_doc.amount)
+		allocated_amount = 0
+		
+		for idx, split in enumerate(splits):
+			is_last_split = (idx == len(splits) - 1)
 			
-			# Calculate amount from percentage if amount not provided
-			if not amount and split.percentage:
-				amount = flt(transaction_doc.amount * split.percentage / 100, 2)
+			if split.amount:
+				# Use explicit amount if provided
+				amount = flt(split.amount, 2)
+			elif split.percentage:
+				if is_last_split:
+					# Last split gets the remainder to avoid rounding errors
+					amount = flt(total_amount - allocated_amount, 2)
+				else:
+					amount = flt(total_amount * split.percentage / 100, 2)
+			else:
+				amount = 0
+			
+			allocated_amount += amount
 			
 			split_accounting_class = getattr(split, 'accounting_class', None) if use_accounting_class else None
 			
@@ -115,8 +140,6 @@ def create_journal_entry_from_transaction(transaction_doc):
 				'account': transaction_doc.expense_account,
 				'cost_center': split.cost_center,
 				'debit_in_account_currency': amount,
-				'party_type': 'Supplier' if transaction_doc.vendor else None,
-				'party': transaction_doc.vendor if transaction_doc.vendor else None,
 				'user_remark': split.notes or ''
 			}
 			# Add accounting class from the split (each line gets its own class)
@@ -135,23 +158,26 @@ def create_journal_entry_from_transaction(transaction_doc):
 			'credit_in_account_currency': abs(transaction_doc.amount)
 		}
 		
-		# Add party info if AMEX account is Payable type (requires Supplier)
+		# Add party info if AMEX account is Payable type
+		# Use transaction vendor if available, otherwise fall back to "American Express"
 		if amex_account_needs_party:
-			amex_supplier = get_or_create_amex_supplier()
-			credit_entry['party_type'] = 'Supplier'
-			credit_entry['party'] = amex_supplier
+			if transaction_doc.vendor:
+				credit_entry['party_type'] = 'Supplier'
+				credit_entry['party'] = transaction_doc.vendor
+			else:
+				amex_supplier = get_or_create_amex_supplier()
+				credit_entry['party_type'] = 'Supplier'
+				credit_entry['party'] = amex_supplier
 		
 		if accounting_class and use_accounting_class:
 			credit_entry['accounting_class'] = accounting_class
 		je.append('accounts', credit_entry)
 		
-		# Single debit entry
+		# Single debit entry - NO party on expense lines (vendor tracked on credit line)
 		debit_entry = {
 			'account': transaction_doc.expense_account,
 			'cost_center': transaction_doc.cost_center,
-			'debit_in_account_currency': abs(transaction_doc.amount),
-			'party_type': 'Supplier' if transaction_doc.vendor else None,
-			'party': transaction_doc.vendor if transaction_doc.vendor else None
+			'debit_in_account_currency': abs(transaction_doc.amount)
 		}
 		if accounting_class and use_accounting_class:
 			debit_entry['accounting_class'] = accounting_class

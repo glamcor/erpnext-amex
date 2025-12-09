@@ -55,13 +55,15 @@
    "fieldtype": "Link",
    "label": "AMEX Liability Account",
    "options": "Account",
-   "reqd": 1
+   "reqd": 1,
+   "link_filters": "[[\"Account\", \"company\", \"=\", \"eval:doc.default_company\"]]"
   },
   {
    "fieldname": "default_expense_account",
    "fieldtype": "Link",
    "label": "Default Expense Account",
-   "options": "Account"
+   "options": "Account",
+   "link_filters": "[[\"Account\", \"company\", \"=\", \"eval:doc.default_company\"]]"
   },
   {
    "fieldname": "column_break_3",
