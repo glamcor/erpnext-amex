@@ -34,14 +34,38 @@ class AMEXReviewPage {
 		this.current_transaction_amount = 0;
 		this.split_row_counter = 0;
 		this.split_fields = {}; // Store Frappe Link field instances for splits
+		this.amex_company = null; // Company filter from settings
 		
 		// Load the HTML
 		$(frappe.render_template("amex_review", {})).appendTo(this.page.body);
 		
-		this.setup_events();
-		this.setup_autocomplete_fields();
-		this.load_filter_options();
-		this.load_transactions();
+		// Load company from settings first, then setup fields
+		this.load_company_setting().then(() => {
+			this.setup_events();
+			this.setup_autocomplete_fields();
+			this.load_filter_options();
+			this.load_transactions();
+		});
+	}
+	
+	load_company_setting() {
+		const me = this;
+		return new Promise((resolve) => {
+			frappe.call({
+				method: 'frappe.client.get_single_value',
+				args: {
+					doctype: 'AMEX Integration Settings',
+					field: 'default_company'
+				},
+				async: false,
+				callback: function(r) {
+					if (r.message) {
+						me.amex_company = r.message;
+					}
+					resolve();
+				}
+			});
+		});
 	}
 
 	setup_autocomplete_fields() {
@@ -70,6 +94,7 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
+							'company': me.amex_company,
 							'root_type': 'Expense',
 							'is_group': 0,
 							'disabled': 0
@@ -91,6 +116,8 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
+							'company': me.amex_company,
+							'is_group': 0,
 							'disabled': 0
 						}
 					};
@@ -106,7 +133,14 @@ class AMEXReviewPage {
 				fieldtype: 'Link',
 				options: 'Accounting Class',
 				label: 'Accounting Class',
-				placeholder: 'Type to search...'
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'company': me.amex_company
+						}
+					};
+				}
 			},
 			render_input: true
 		});
@@ -134,6 +168,7 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
+							'company': me.amex_company,
 							'root_type': 'Expense',
 							'is_group': 0,
 							'disabled': 0
@@ -155,6 +190,8 @@ class AMEXReviewPage {
 				get_query: () => {
 					return {
 						filters: {
+							'company': me.amex_company,
+							'is_group': 0,
 							'disabled': 0
 						}
 					};
@@ -170,7 +207,14 @@ class AMEXReviewPage {
 				fieldtype: 'Link',
 				options: 'Accounting Class',
 				label: 'Accounting Class',
-				placeholder: 'Type to search...'
+				placeholder: 'Type to search...',
+				get_query: () => {
+					return {
+						filters: {
+							'company': me.amex_company
+						}
+					};
+				}
 			},
 			render_input: true
 		});
@@ -636,7 +680,11 @@ class AMEXReviewPage {
 				placeholder: 'Cost Center',
 				get_query: () => {
 					return {
-						filters: { 'disabled': 0 }
+						filters: { 
+							'company': me.amex_company,
+							'is_group': 0,
+							'disabled': 0 
+						}
 					};
 				}
 			},
@@ -649,7 +697,14 @@ class AMEXReviewPage {
 			df: {
 				fieldtype: 'Link',
 				options: 'Accounting Class',
-				placeholder: 'Class'
+				placeholder: 'Class',
+				get_query: () => {
+					return {
+						filters: { 
+							'company': me.amex_company
+						}
+					};
+				}
 			},
 			render_input: true
 		});
