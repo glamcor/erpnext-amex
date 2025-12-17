@@ -23,11 +23,10 @@ setup(
     ],
     python_requires=">=3.10",
     install_requires=[
-        "frappe",
-        "erpnext",
         "pandas>=2.0.0",
         "boto3>=1.26.0",
         "requests>=2.28.0",
+        "beautifulsoup4>=4.12.0",
     ],
     include_package_data=True,
     zip_safe=False,

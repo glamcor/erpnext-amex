@@ -1,8 +1,6 @@
-# Frappe and ERPNext (provided by bench)
-frappe
-erpnext
-
 # Additional dependencies for AMEX Integration
+# Note: Do NOT list `frappe` or `erpnext` here. Bench provides them; declaring them causes pip
+# to install the unsupported PyPI `frappe` package, which breaks `bench build` on Frappe Cloud.
 pandas>=2.0.0
 boto3>=1.26.0
 requests>=2.28.0
